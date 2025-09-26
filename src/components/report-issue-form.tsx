@@ -28,16 +28,6 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { addIssue, getIssues } from '@/lib/firebase-service';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -52,13 +42,13 @@ import {
   AlertTriangle,
   CheckCircle,
   Camera,
+  Info,
 } from 'lucide-react';
 import Image from 'next/image';
 import type { AppUser, IssueCategory, EmergencyCategory } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { CameraCapture } from './camera-capture';
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
 
 const allCategories: (IssueCategory | EmergencyCategory)[] = [
     'Garbage & Waste Management Problems',
@@ -116,10 +106,6 @@ export function ReportIssueForm({
     status: 'idle' | 'checking' | 'clear' | 'unclear';
     reason?: string;
   }>({ status: 'idle' });
-  const [duplicateInfo, setDuplicateInfo] = useState<{
-    isDuplicate: boolean;
-    duplicateIssueId?: string;
-  } | null>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -225,8 +211,12 @@ export function ReportIssueForm({
         
         // Use a reasonable confidence threshold
         if (duplicateResult.isDuplicate && duplicateResult.confidence > 0.8) {
-          setDuplicateInfo(duplicateResult);
-          setIsSubmitting(false); // Stop submission and show dialog
+          toast({
+            title: 'Duplicate Report',
+            description: 'This issue has already been reported and is in process. Thank you!',
+            duration: 5000,
+          });
+          setIsSubmitting(false); // Stop submission
           return;
         }
       }
@@ -264,7 +254,6 @@ export function ReportIssueForm({
         toast({ variant: 'destructive', title: 'Submission Error', description: 'Could not save your report.'});
     } finally {
         setIsSubmitting(false);
-        setDuplicateInfo(null); // Also clear duplicate info here
     }
   };
   
@@ -392,23 +381,8 @@ export function ReportIssueForm({
           </Button>
         </form>
       </Form>
-      <AlertDialog open={!!duplicateInfo} onOpenChange={(open) => !open && setDuplicateInfo(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Duplicate Report Detected</AlertDialogTitle>
-            <AlertDialogDescription>
-              This issue appears to have been reported already. You can view the original report by clicking the button below, or you can proceed to submit your report anyway if you believe this is a different issue.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDuplicateInfo(null)}>Cancel</AlertDialogCancel>
-            <Button variant="outline" onClick={finishSubmission}>Submit Anyway</Button>
-            <AlertDialogAction asChild>
-                <Link href={`/issues/${duplicateInfo?.duplicateIssueId}`} target="_blank" rel="noopener noreferrer">View Original Report</Link>
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }
+
+    

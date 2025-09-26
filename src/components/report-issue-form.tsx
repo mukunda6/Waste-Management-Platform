@@ -213,7 +213,7 @@ export function ReportIssueForm({
         if (duplicateResult.isDuplicate && duplicateResult.confidence > 0.8) {
           toast({
             title: 'Duplicate Report',
-            description: 'This issue has already been reported and is in process. Thank you!',
+            description: 'This issue has already been reported.',
             duration: 5000,
           });
           setIsSubmitting(false); // Stop submission
@@ -384,5 +384,3 @@ export function ReportIssueForm({
     </>
   );
 }
-
-    

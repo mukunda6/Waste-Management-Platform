@@ -9,22 +9,44 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { getIssues, getWorkers } from '@/lib/firebase-service';
-import type { Issue, Worker } from '@/lib/types';
+import { getIssues } from '@/lib/firebase-service';
+import type { Issue } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { ListChecks, Users, Shield, AlertTriangle, Clock } from 'lucide-react';
-import { Badge } from './ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { formatDistanceToNow } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { Button } from './ui/button';
-import Link from 'next/link';
+import { BarChart, PieChart, DonutChart, Legend, Bar, XAxis, YAxis, Tooltip, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { useLanguage } from '@/hooks/use-language';
+
+
+type CityData = {
+    city: string;
+    submitted: number;
+    inProgress: number;
+    resolved: number;
+}
+
+type CategoryData = {
+    name: string;
+    count: number;
+}
+
+const chartConfig = {
+  submitted: {
+    label: "Submitted",
+    color: "hsl(var(--chart-1))",
+  },
+  inProgress: {
+    label: "In Progress",
+    color: "hsl(var(--chart-2))",
+  },
+  resolved: {
+    label: "Resolved",
+    color: "hsl(var(--chart-3))",
+  },
+};
 
 export function HeadDashboard() {
   const [issues, setIssues] = useState<Issue[]>([]);
-  const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -32,9 +54,8 @@ export function HeadDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [fetchedIssues, fetchedWorkers] = await Promise.all([getIssues(), getWorkers()]);
+        const fetchedIssues = await getIssues();
         setIssues(fetchedIssues);
-        setWorkers(fetchedWorkers);
       } catch (error) {
         console.error("Error fetching head data:", error);
         toast({
@@ -48,11 +69,38 @@ export function HeadDashboard() {
     };
     fetchData();
   }, [toast]);
+  
+  const cityData: CityData[] = issues.reduce((acc, issue) => {
+    const city = issue.city || 'Unknown';
+    let cityEntry = acc.find(c => c.city === city);
+    if(!cityEntry) {
+        cityEntry = { city, submitted: 0, inProgress: 0, resolved: 0 };
+        acc.push(cityEntry);
+    }
+    if(issue.status === 'Submitted') cityEntry.submitted++;
+    if(issue.status === 'In Progress') cityEntry.inProgress++;
+    if(issue.status === 'Resolved') cityEntry.resolved++;
 
-  const openIssuesCount = issues.filter(issue => issue.status !== 'Resolved').length;
-  const resolvedIssuesCount = issues.length - openIssuesCount;
-  const emergencyIssues = issues.filter(issue => issue.isEmergency && issue.status !== 'Resolved');
-  const escalatedIssues = issues.filter(issue => issue.slaStatus === 'Escalated');
+    return acc;
+  }, [] as CityData[]);
+
+  const statusDistribution = issues.reduce((acc, issue) => {
+    acc[issue.status] = (acc[issue.status] || 0) + 1;
+    return acc;
+  }, {} as Record<Issue['status'], number>);
+
+  const pieChartData = Object.entries(statusDistribution).map(([name, value]) => ({ name, value }));
+
+  const categoryData: CategoryData[] = issues.reduce((acc, issue) => {
+    let categoryEntry = acc.find(c => c.name === issue.category);
+    if (!categoryEntry) {
+        categoryEntry = { name: issue.category, count: 0 };
+        acc.push(categoryEntry);
+    }
+    categoryEntry.count++;
+    return acc;
+  }, [] as CategoryData[]).sort((a,b) => b.count - a.count);
+
 
   if (loading) {
     return <div>Loading head dashboard...</div>
@@ -61,107 +109,73 @@ export function HeadDashboard() {
   return (
     <div className="grid gap-8">
       <CardHeader className="px-0">
-        <CardTitle>System-Wide Overview</CardTitle>
-        <CardDescription>High-level metrics for all civic issues and personnel.</CardDescription>
+        <CardTitle>System-Wide Analytics</CardTitle>
+        <CardDescription>High-level metrics for all civic issues across all regions.</CardDescription>
       </CardHeader>
-      <div className="grid gap-4 md:grid-cols-4">
-         <Card className="col-span-1 md:col-span-1">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-destructive">Active Emergencies</CardTitle>
-                <AlertTriangle className="h-4 w-4 text-destructive" />
+      
+      <div className="grid gap-8 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+            <CardHeader>
+                <CardTitle>Issues by City</CardTitle>
+                <CardDescription>Breakdown of issue statuses in each city.</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{emergencyIssues.length}</div>
-                <p className="text-xs text-muted-foreground">Issues requiring immediate action</p>
+                 <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
+                     <BarChart data={cityData} accessibilityLayer>
+                        <XAxis dataKey="city" tickLine={false} tickMargin={10} axisLine={false} />
+                        <YAxis />
+                        <Tooltip content={<ChartTooltipContent />} />
+                        <Legend />
+                        <Bar dataKey="submitted" stackId="a" fill="var(--color-submitted)" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="inProgress" stackId="a" fill="var(--color-inProgress)" />
+                        <Bar dataKey="resolved" stackId="a" fill="var(--color-resolved)" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                </ChartContainer>
             </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Open Issues</CardTitle>
-            <ListChecks className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{openIssuesCount}</div>
-            <p className="text-xs text-muted-foreground">Across all departments</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Resolved Issues</CardTitle>
-            <Shield className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{resolvedIssuesCount}</div>
-             <p className="text-xs text-muted-foreground">Successfully completed tasks</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Workers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{workers.length}</div>
-            <p className="text-xs text-muted-foreground">Active field personnel</p>
-          </CardContent>
+         <Card>
+            <CardHeader>
+                <CardTitle>Overall Issue Status</CardTitle>
+                <CardDescription>Distribution of all issues by their current status.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
+                    <PieChart>
+                        <Tooltip content={<ChartTooltipContent hideLabel />} />
+                        <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90}>
+                             {pieChartData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={chartConfig[entry.name as keyof typeof chartConfig]?.color || '#8884d8'} />
+                            ))}
+                        </Pie>
+                        <Legend />
+                    </PieChart>
+                </ChartContainer>
+            </CardContent>
         </Card>
       </div>
-      
-       {escalatedIssues.length > 0 && (
-        <Card className="border-purple-500 border-2">
-             <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-purple-600">
-                    <AlertTriangle />
-                    Escalated Issues
-                </CardTitle>
-                <CardDescription>These critical issues have breached their extended SLA. Intervention is required.</CardDescription>
+
+       <Card>
+            <CardHeader>
+                <CardTitle>Issue Breakdown by Category</CardTitle>
+                <CardDescription>Frequency of each issue type reported across the system.</CardDescription>
             </CardHeader>
             <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Issue</TableHead>
-                            <TableHead>Time Elapsed Since Report</TableHead>
-                            <TableHead>Assigned To</TableHead>
-                            <TableHead>Last Remark</TableHead>
-                            <TableHead className='text-right'>Action</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {escalatedIssues.map(issue => {
-                            const lastRemark = issue.updates.filter(u => u.isSlaUpdate).pop()?.description || 'N/A';
-                            const worker = issue.assignedTo ? workers.find(w => w.id === issue.assignedTo) : null;
-                            const workerName = worker ? t(worker.nameKey) : <span className="text-destructive font-medium">Unassigned</span>;
-
-                            return (
-                                <TableRow key={issue.id}>
-                                    <TableCell>
-                                        <p className="font-medium">{issue.title}</p>
-                                        <p className="text-sm text-muted-foreground">{issue.category}</p>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className='flex items-center gap-2'>
-                                            <Clock className="h-4 w-4"/>
-                                            {formatDistanceToNow(new Date(issue.submittedAt))}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>{workerName}</TableCell>
-                                    <TableCell className="max-w-xs truncate italic">"{lastRemark}"</TableCell>
-                                    <TableCell className='text-right'>
-                                        <Button asChild size="sm">
-                                            <Link href={`/issues/${issue.id}`}>
-                                                Review & Reassign
-                                            </Link>
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            )
-                        })}
-                    </TableBody>
-                </Table>
+                <ChartContainer config={{ count: { label: 'Count', color: 'hsl(var(--chart-1))' } }} className="min-h-[400px] w-full">
+                    <BarChart data={categoryData} layout="vertical" accessibilityLayer>
+                        <YAxis 
+                            dataKey="name" 
+                            type="category"
+                            width={250}
+                            tickLine={false}
+                            axisLine={false}
+                        />
+                        <XAxis type="number" hide />
+                        <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<ChartTooltipContent />} />
+                        <Bar dataKey="count" fill="var(--color-count)" radius={4} />
+                    </BarChart>
+                </ChartContainer>
             </CardContent>
         </Card>
-       )}
     </div>
   )
 }

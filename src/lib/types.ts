@@ -39,6 +39,7 @@ export interface Issue {
   description: string;
   category: IssueCategory | EmergencyCategory;
   status: IssueStatus;
+  city?: string;
   slaStatus: SlaStatus;
   slaDeadline: string; // ISO string
   location: {

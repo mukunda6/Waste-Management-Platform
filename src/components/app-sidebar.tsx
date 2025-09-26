@@ -84,7 +84,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
             </>
             )}
-             {user?.role === 'Admin' && (
+             {(user?.role === 'Admin' || user?.role === 'Head') && (
             <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
@@ -102,21 +102,6 @@ export function AppSidebar() {
 
         
       </SidebarContent>
-      <Separator className="my-0 bg-border/50" />
-      <SidebarFooter className="p-4">
-        {!loading && user && (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={user.avatarUrl} />
-              <AvatarFallback>{user.name ? user.name.charAt(0) : 'U'}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="font-medium text-sm">{user.name}</span>
-              <span className="text-xs text-muted-foreground">{user.email}</span>
-            </div>
-          </div>
-        )}
-      </SidebarFooter>
     </Sidebar>
   );
 }

@@ -1,7 +1,16 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
+  swcMinify: true,
+  compress: true,
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+      timeout: 120,
+    },
+  },
   typescript: {
     ignoreBuildErrors: true,
   },

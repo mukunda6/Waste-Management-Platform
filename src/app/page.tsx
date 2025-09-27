@@ -47,22 +47,22 @@ const otpSchema = z.object({
 
 type Role = 'Citizen' | 'Admin' | 'Head' | 'Buyer';
 
-const roleCredentials: Record<Role, { email: string; description: string }> = {
+const roleCredentials: Record<Role, { emailOrMobile: string; description: string }> = {
     Citizen: {
-        email: 'citizen@test.com',
+        emailOrMobile: '9876543210',
         description: 'Track waste segregation, report issues, and earn rewards.'
     },
+     Buyer: {
+        emailOrMobile: '9876543213',
+        description: 'Purchase recycled materials and other waste-derived products.'
+    },
     Admin: {
-        email: 'admin@test.com',
+        emailOrMobile: 'admin@test.com',
         description: 'Manage waste collection, monitor compliance, and assign tasks.'
     },
     Head: {
-        email: 'head@test.com',
+        emailOrMobile: 'head@test.com',
         description: 'Oversee city-wide waste analytics and policy effectiveness.'
-    },
-    Buyer: {
-        email: 'buyer@test.com',
-        description: 'Purchase recycled materials and other waste-derived products.'
     }
 }
 
@@ -82,7 +82,7 @@ export default function LoginPage() {
   const emailForm = useForm<z.infer<typeof emailLoginFormSchema>>({
     resolver: zodResolver(emailLoginFormSchema),
     defaultValues: {
-      email: roleCredentials.Admin.email, // Default to Admin for the email form
+      email: roleCredentials.Admin.emailOrMobile, // Default to Admin for the email form
       password: 'password',
     },
   })
@@ -151,10 +151,13 @@ export default function LoginPage() {
 
 
   const handleTabChange = (role: Role) => {
-    if (role !== 'Citizen') {
-      emailForm.setValue('email', roleCredentials[role].email);
+    if (role === 'Admin' || role === 'Head') {
+      emailForm.setValue('email', roleCredentials[role].emailOrMobile);
       emailForm.setValue('password', 'password');
+    } else {
+      mobileForm.setValue('mobile', roleCredentials[role].emailOrMobile)
     }
+    setLoginStep('mobileInput');
   }
 
   // Show a full-screen loader while we're determining the auth state.
@@ -293,11 +296,23 @@ export default function LoginPage() {
     </>
   );
 
-  const CitizenLoginForm = () => (
-     <div className="pt-4">
-        <MobileLoginForm />
-     </div>
-  );
+  const MobileLoginContent = ({ description, defaultMobile }: { description: string, defaultMobile: string }) => {
+    useEffect(() => {
+        mobileForm.setValue('mobile', defaultMobile);
+    }, [defaultMobile]);
+
+    return (
+        <>
+            <p className="text-sm text-muted-foreground text-center h-10 flex items-center justify-center px-4">
+                {description}
+            </p>
+            <div className="pt-4">
+                <MobileLoginForm />
+            </div>
+        </>
+    );
+  };
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
@@ -321,17 +336,11 @@ export default function LoginPage() {
               <TabsTrigger value="Admin">Admin</TabsTrigger>
               <TabsTrigger value="Head">Head</TabsTrigger>
             </TabsList>
-            <TabsContent value="Citizen" className="pt-4">
-               <p className="text-sm text-muted-foreground text-center h-10 flex items-center justify-center px-4">
-                 Sign in with your mobile number to report issues, track progress, and earn rewards.
-                </p>
-                <CitizenLoginForm />
+            <TabsContent value="Citizen">
+                <MobileLoginContent description={roleCredentials.Citizen.description} defaultMobile={roleCredentials.Citizen.emailOrMobile} />
             </TabsContent>
             <TabsContent value="Buyer">
-               <p className="text-sm text-muted-foreground text-center h-10 flex items-center justify-center px-4">
-                 {roleCredentials.Buyer.description}
-                </p>
-              <EmailLoginForm role="Buyer" />
+               <MobileLoginContent description={roleCredentials.Buyer.description} defaultMobile={roleCredentials.Buyer.emailOrMobile} />
             </TabsContent>
             <TabsContent value="Admin">
                <p className="text-sm text-muted-foreground text-center h-10 flex items-center justify-center px-4">
@@ -357,3 +366,5 @@ export default function LoginPage() {
     </div>
   )
 }
+
+    

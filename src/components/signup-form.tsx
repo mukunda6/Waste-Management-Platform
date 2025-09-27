@@ -35,9 +35,20 @@ const baseSchema = z.object({
   }),
 });
 
-const citizenSchema = baseSchema.omit({ terms: true }); // No terms for citizen simple form
-const buyerSchema = baseSchema.omit({ terms: true }).extend({
-    companyName: z.string().min(2, 'Company name is required.')
+const mobileBaseSchema = z.object({
+    fullName: z.string().min(3, 'Full name must be at least 3 characters.'),
+    mobileNumber: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit mobile number.'),
+});
+
+
+const citizenSchema = mobileBaseSchema.extend({});
+
+const buyerSchema = mobileBaseSchema.extend({
+    companyName: z.string().min(2, 'Company name is required.'),
+    email: z.string().email('Please enter a valid official email.'),
+    terms: z.boolean().refine(val => val === true, {
+        message: 'You must accept the terms and conditions.',
+    }),
 });
 
 
@@ -95,15 +106,13 @@ export function SignupForm({ role }: { role: UserRole }) {
     )),
     defaultValues: role === 'Citizen' ? {
         fullName: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
+        mobileNumber: '',
       } : role === 'Buyer' ? {
         fullName: '',
         companyName: '',
+        mobileNumber: '',
         email: '',
-        password: '',
-        confirmPassword: '',
+        terms: false,
       } : {
         fullName: '',
         email: '',
@@ -128,10 +137,16 @@ export function SignupForm({ role }: { role: UserRole }) {
     setIsLoading(true);
     try {
         const displayName = role === 'Buyer' && 'companyName' in values ? values.companyName : values.fullName;
-        await signUp(values.email, values.password, displayName, role, values);
+        
+        // For mobile-based signup, we pass a mock password. In a real app, this would be handled differently.
+        const email = 'email' in values ? values.email : `${values.mobileNumber}@test.com`;
+        const password = 'password' in values ? values.password as string : 'password';
+
+        await signUp(email, password, displayName, role, values);
+
         toast({
             title: 'Account Created!',
-            description: "You have been successfully signed up. Redirecting to dashboard...",
+            description: "You have been successfully signed up. Redirecting to your dashboard...",
         });
         router.push('/dashboard');
     } catch (error: any) {
@@ -166,18 +181,29 @@ export function SignupForm({ role }: { role: UserRole }) {
             )}/>
         )}
 
-        <FormField control={form.control} name="email" render={({ field }) => (
-            <FormItem><FormLabel>Official Email</FormLabel><FormControl><Input placeholder="Enter official email" {...field} type="email" /></FormControl><FormMessage /></FormItem>
-        )}/>
+        {(role === 'Citizen' || role === 'Buyer') ? (
+            <FormField control={form.control} name="mobileNumber" render={({ field }) => (
+                <FormItem><FormLabel>Mobile Number</FormLabel><FormControl><Input placeholder="10-digit mobile number" {...field} /></FormControl><FormMessage /></FormItem>
+            )}/>
+        ) : null}
 
-        <div className="grid md:grid-cols-2 gap-4">
-            <FormField control={form.control} name="password" render={({ field }) => (
-                <FormItem><FormLabel>Password</FormLabel><FormControl><Input placeholder="Create a strong password" {...field} type="password" /></FormControl><FormMessage /></FormItem>
-            )}/>
-            <FormField control={form.control} name="confirmPassword" render={({ field }) => (
-                <FormItem><FormLabel>Confirm Password</FormLabel><FormControl><Input placeholder="Confirm your password" {...field} type="password" /></FormControl><FormMessage /></FormItem>
-            )}/>
-        </div>
+
+        {(role === 'Admin' || role === 'Head' || role === 'Buyer') && (
+          <FormField control={form.control} name="email" render={({ field }) => (
+              <FormItem><FormLabel>Official Email</FormLabel><FormControl><Input placeholder="Enter official email" {...field} type="email" /></FormControl><FormMessage /></FormItem>
+          )}/>
+        )}
+
+        {(role === 'Admin' || role === 'Head') && (
+            <div className="grid md:grid-cols-2 gap-4">
+                <FormField control={form.control} name="password" render={({ field }) => (
+                    <FormItem><FormLabel>Password</FormLabel><FormControl><Input placeholder="Create a strong password" {...field} type="password" /></FormControl><FormMessage /></FormItem>
+                )}/>
+                <FormField control={form.control} name="confirmPassword" render={({ field }) => (
+                    <FormItem><FormLabel>Confirm Password</FormLabel><FormControl><Input placeholder="Confirm your password" {...field} type="password" /></FormControl><FormMessage /></FormItem>
+                )}/>
+            </div>
+        )}
 
         {/* Staff-only Fields */}
         {(role === 'Admin' || role === 'Head') && (
@@ -275,3 +301,5 @@ export function SignupForm({ role }: { role: UserRole }) {
     </Form>
   );
 }
+
+    

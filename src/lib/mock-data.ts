@@ -50,6 +50,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     password: 'password',
     role: 'Buyer',
     avatarUrl: 'https://picsum.photos/seed/buyer/100/100',
+    mobileNumber: '9876543213',
   },
   {
     uid: 'citizen-user-01',
@@ -291,3 +292,5 @@ export let mockIssues: Issue[] = [
     ]
   }
 ];
+
+    

@@ -11,8 +11,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { PieChart, Pie, Cell, Tooltip } from 'recharts';
-import { Leaf, Recycle, Atom, ShoppingCart, MapPin, Clock, DollarSign } from 'lucide-react';
+import { Leaf, Recycle, Atom, ShoppingCart, MapPin, Clock, DollarSign, Truck, CheckCircle, X, ListOrdered } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { Badge } from './ui/badge';
+import { cn } from '@/lib/utils';
+import { format, formatDistanceToNow, parseISO } from 'date-fns';
 
 
 type ProductData = {
@@ -69,15 +72,27 @@ const wasteStreams: WasteStreamData[] = [
     },
 ];
 
-const wasteChartConfig = {
-    compost: { label: 'Compost', color: 'hsl(var(--chart-1))' },
-    biogas: { label: 'Biogas', color: 'hsl(var(--chart-2))' },
-    animalFeed: { label: 'Animal Feed', color: 'hsl(var(--chart-3))' },
-    plastic: { label: 'Plastic', color: 'hsl(var(--chart-1))' },
-    paper: { label: 'Paper', color: 'hsl(var(--chart-2))' },
-    metal: { label: 'Metal/Glass', color: 'hsl(var(--chart-3))' },
-    disposed: { label: 'Disposed', color: 'hsl(var(--chart-2))' },
-    energy: { label: 'Energy', color: 'hsl(var(--chart-1))' },
+type MyOrder = {
+  id: string;
+  product: string;
+  quantity: number; // in tons
+  orderDate: string;
+  deliveryDate: string;
+  status: 'Pending Approval' | 'Approved' | 'In Transit' | 'Delivered' | 'Denied';
+};
+
+const myOrders: MyOrder[] = [
+    { id: 'order-002', product: 'Organic Compost', quantity: 25, orderDate: '2024-07-27T14:30:00Z', deliveryDate: '2024-08-10T17:00:00Z', status: 'Approved' },
+    { id: 'order-003', product: 'Incineration Ash', quantity: 5, orderDate: '2024-07-26T11:00:00Z', deliveryDate: '2024-08-01T17:00:00Z', status: 'In Transit' },
+    { id: 'order-004', product: 'Cardboard Bales', quantity: 15, orderDate: '2024-07-20T09:00:00Z', deliveryDate: '2024-07-28T17:00:00Z', status: 'Delivered' },
+];
+
+const orderStatusConfig = {
+    'Pending Approval': { color: 'bg-yellow-100 text-yellow-800', icon: <Clock className="h-4 w-4" /> },
+    'Approved': { color: 'bg-blue-100 text-blue-800', icon: <CheckCircle className="h-4 w-4" /> },
+    'In Transit': { color: 'bg-purple-100 text-purple-800', icon: <Truck className="h-4 w-4" /> },
+    'Delivered': { color: 'bg-green-100 text-green-800', icon: <CheckCircle className="h-4 w-4" /> },
+    'Denied': { color: 'bg-red-100 text-red-800', icon: <X className="h-4 w-4" /> },
 };
 
 
@@ -147,6 +162,53 @@ export function BuyerDashboard() {
                         </CardContent>
                     </Card>
                 ))}
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-2xl font-headline"><ListOrdered /> My Order History & Tracking</CardTitle>
+                <CardDescription>Monitor the status and delivery timeline of your recent purchases.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Order ID</TableHead>
+                            <TableHead>Product</TableHead>
+                            <TableHead>Est. Delivery / Delivered On</TableHead>
+                            <TableHead>Status</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {myOrders.map(order => (
+                            <TableRow key={order.id}>
+                                <TableCell className="font-mono text-sm">{order.id}</TableCell>
+                                <TableCell>
+                                    <div className="font-medium">{order.product}</div>
+                                    <div className="text-sm text-muted-foreground">{order.quantity} Tons</div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="font-medium">
+                                        {order.status === 'Delivered' 
+                                            ? format(parseISO(order.deliveryDate), 'MMM d, yyyy')
+                                            : formatDistanceToNow(parseISO(order.deliveryDate), { addSuffix: true })
+                                        }
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                        {order.status !== 'Delivered' && format(parseISO(order.deliveryDate), 'MMM d, yyyy')}
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge variant="outline" className={cn('gap-2 font-semibold', orderStatusConfig[order.status].color)}>
+                                        {orderStatusConfig[order.status].icon}
+                                        {order.status}
+                                    </Badge>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
             </CardContent>
         </Card>
     </div>

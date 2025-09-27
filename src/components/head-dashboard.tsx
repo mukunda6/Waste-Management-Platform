@@ -13,7 +13,7 @@ import { getIssues } from '@/lib/firebase-service';
 import type { Issue } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { BarChart, PieChart, LineChart, Line, Legend, Bar, XAxis, YAxis, Tooltip, Pie, Cell, ResponsiveContainer, DonutChart } from 'recharts';
+import { BarChart, PieChart, LineChart, Line, Legend, Bar, XAxis, YAxis, Tooltip, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { Users, Map, Recycle, TrendingUp, Atom, Leaf, Fuel } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
@@ -131,14 +131,14 @@ export function HeadDashboard() {
                         </CardHeader>
                         <CardContent>
                              <ChartContainer config={wasteChartConfig} className="mx-auto aspect-square h-48">
-                                <DonutChart>
+                                <PieChart>
                                     <Tooltip content={<ChartTooltipContent hideLabel />} />
                                     <Pie data={stream.potential} dataKey="value" nameKey="name" innerRadius={40}>
                                         {stream.potential.map((entry) => (
                                             <Cell key={entry.name} fill={entry.fill} />
                                         ))}
                                     </Pie>
-                                </DonutChart>
+                                </PieChart>
                              </ChartContainer>
                              <div className="mt-4">
                                 <p className="font-semibold text-sm mb-2">Potential Outputs:</p>

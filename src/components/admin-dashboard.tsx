@@ -27,16 +27,17 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { getIssues, getWorkers, updateIssueAssignment } from '@/lib/firebase-service';
 import type { Issue, Worker, SlaStatus } from '@/lib/types';
-import { formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { ListChecks, Users, AlertTriangle, Clock, Map, Trash2, Percent } from 'lucide-react';
+import { ListChecks, Users, AlertTriangle, Clock, Map, Trash2, Percent, ShoppingBag, Truck, Check, X } from 'lucide-react';
 import { Button } from './ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/use-language';
 import { Bar, BarChart, CartesianGrid, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from './ui/chart';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
 
 const slaStatusColors: Record<SlaStatus, string> = {
@@ -48,9 +49,38 @@ const slaStatusColors: Record<SlaStatus, string> = {
 };
 
 
+type BuyerOrder = {
+  id: string;
+  buyerName: string;
+  product: string;
+  quantity: number; // in tons
+  location: string;
+  orderDate: string;
+  deadline: string;
+  status: 'Pending Approval' | 'Approved' | 'In Transit' | 'Delivered' | 'Denied';
+};
+
+const mockBuyerOrders: BuyerOrder[] = [
+    { id: 'order-001', buyerName: 'Recycle Corp.', product: 'PET/HDPE Pellets', quantity: 10, location: 'Jeedimetla Industrial Area', orderDate: '2024-07-28T10:00:00Z', deadline: '2024-08-05T17:00:00Z', status: 'Pending Approval' },
+    { id: 'order-002', buyerName: 'GreenSoil Organics', product: 'Organic Compost', quantity: 25, location: 'Amberpet Farms', orderDate: '2024-07-27T14:30:00Z', deadline: '2024-08-10T17:00:00Z', status: 'Approved' },
+    { id: 'order-003', buyerName: 'BuildStrong Bricks', product: 'Incineration Ash', quantity: 5, location: 'Patancheru', orderDate: '2024-07-26T11:00:00Z', deadline: '2024-08-01T17:00:00Z', status: 'In Transit' },
+    { id: 'order-004', buyerName: 'National Paper Mill', product: 'Cardboard Bales', quantity: 15, location: 'Cherlapally', orderDate: '2024-07-20T09:00:00Z', deadline: '2024-07-28T17:00:00Z', status: 'Delivered' },
+    { id: 'order-005', buyerName: 'Scrap Kings', product: 'Scrap Metal Mix', quantity: 8, location: 'Balanagar', orderDate: '2024-07-29T16:00:00Z', deadline: '2024-08-06T17:00:00Z', status: 'Pending Approval' },
+];
+
+const orderStatusConfig = {
+    'Pending Approval': { color: 'bg-yellow-100 text-yellow-800', icon: <Clock className="h-4 w-4" /> },
+    'Approved': { color: 'bg-blue-100 text-blue-800', icon: <Check className="h-4 w-4" /> },
+    'In Transit': { color: 'bg-purple-100 text-purple-800', icon: <Truck className="h-4 w-4" /> },
+    'Delivered': { color: 'bg-green-100 text-green-800', icon: <CheckCircle className="h-4 w-4" /> },
+    'Denied': { color: 'bg-red-100 text-red-800', icon: <X className="h-4 w-4" /> },
+};
+
+
 export function AdminDashboard() {
   const [issues, setIssues] = useState<Issue[]>([]);
   const [workers, setWorkers] = useState<Worker[]>([]);
+  const [orders, setOrders] = useState<BuyerOrder[]>(mockBuyerOrders);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -97,6 +127,14 @@ export function AdminDashboard() {
       });
     }
   };
+
+   const handleOrderStatusChange = (orderId: string, newStatus: BuyerOrder['status']) => {
+    setOrders(prevOrders => prevOrders.map(order => order.id === orderId ? { ...order, status: newStatus } : order));
+    toast({
+        title: `Order ${newStatus}`,
+        description: `The buyer order has been marked as ${newStatus.toLowerCase()}.`
+    });
+  };
   
   const getWorkerName = (workerId?: string) => {
     if (!workerId) return 'Unassigned';
@@ -106,10 +144,10 @@ export function AdminDashboard() {
 
   // Mock analytics data
   const segregationData = [
-    { name: 'Zone A', compliance: 85 },
-    { name: 'Zone B', compliance: 72 },
-    { name: 'Zone C', compliance: 91 },
-    { name: 'Zone D', compliance: 65 },
+    { name: 'Charminar', compliance: 85 },
+    { name: 'Kukatpally', compliance: 72 },
+    { name: 'Serilingampally', compliance: 91 },
+    { name: 'L.B. Nagar', compliance: 65 },
   ];
   const dailyWasteData = { collected: 450, processed: 380, TPD: 450 }; // in Tons
 
@@ -133,12 +171,12 @@ export function AdminDashboard() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Unassigned Tasks</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-destructive" />
+            <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
+            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{unassignedIssues.length}</div>
-            <p className="text-xs text-muted-foreground">Complaints needing worker assignment.</p>
+            <div className="text-2xl font-bold">{orders.filter(o => o.status === 'Pending Approval').length}</div>
+            <p className="text-xs text-muted-foreground">Buyer orders needing approval.</p>
           </CardContent>
         </Card>
         <Card>
@@ -153,83 +191,113 @@ export function AdminDashboard() {
         </Card>
          <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Facilities</CardTitle>
-            <Map className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Unassigned Tasks</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
-             <p className="text-xs text-muted-foreground">Plants, recycling & scrap centers.</p>
+            <div className="text-2xl font-bold">{unassignedIssues.length}</div>
+            <p className="text-xs text-muted-foreground">Complaints needing worker assignment.</p>
           </CardContent>
         </Card>
       </div>
 
-       <div className="grid gap-8 md:grid-cols-2">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Percent /> Segregation Compliance Tracker</CardTitle>
-                    <CardDescription>Percentage of households/buildings following segregation rules by zone.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <ChartContainer config={{}} className="h-64 w-full">
-                        <BarChart data={segregationData} accessibilityLayer>
-                            <CartesianGrid vertical={false} />
-                            <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} />
-                            <Tooltip cursor={{fill: 'hsl(var(--muted))'}} content={<ChartTooltipContent />} />
-                            <Bar dataKey="compliance" fill="hsl(var(--primary))" radius={4}>
-                            </Bar>
-                        </BarChart>
-                    </ChartContainer>
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Trash2 /> Daily Waste Analytics</CardTitle>
-                    <CardDescription>Overview of today's total waste collected and processed.</CardDescription>
-                </CardHeader>
-                <CardContent className="flex justify-around items-center h-64">
-                    <div className="text-center">
-                        <p className="text-4xl font-bold">{dailyWasteData.TPD}</p>
-                        <p className="text-muted-foreground">Tons Per Day (TPD)</p>
-                    </div>
-                    <div className="text-center">
-                        <p className="text-4xl font-bold">{dailyWasteData.processed}</p>
-                        <p className="text-muted-foreground">Tons Processed</p>
-                    </div>
-                </CardContent>
-            </Card>
-       </div>
+       <Tabs defaultValue="complaints">
+            <TabsList>
+                <TabsTrigger value="complaints">Waste Complaints</TabsTrigger>
+                <TabsTrigger value="orders">Buyer Orders</TabsTrigger>
+            </TabsList>
 
+            <TabsContent value="complaints" className="space-y-8 mt-4">
+                 {emergencyIssues.length > 0 && (
+                    <Card className="border-destructive border-2">
+                        <CardHeader>
+                            <div className="flex justify-between items-center">
+                                <CardTitle className="flex items-center gap-2 text-destructive">
+                                    <AlertTriangle />
+                                    Emergency Waste Reports
+                                </CardTitle>
+                                <Badge variant="destructive">{emergencyIssues.length} Active</Badge>
+                            </div>
+                            <CardDescription>These high-priority hazards require immediate attention and assignment.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <IssueTable issues={emergencyIssues} workers={workers} onAssign={handleAssignWorker} getWorkerName={getWorkerName} />
+                        </CardContent>
+                    </Card>
+                )}
 
-       {emergencyIssues.length > 0 && (
-        <Card className="border-destructive border-2">
-            <CardHeader>
-                <div className="flex justify-between items-center">
-                    <CardTitle className="flex items-center gap-2 text-destructive">
-                        <AlertTriangle />
-                        Emergency Waste Reports
-                    </CardTitle>
-                    <Badge variant="destructive">{emergencyIssues.length} Active</Badge>
-                </div>
-                <CardDescription>These high-priority hazards require immediate attention and assignment.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <IssueTable issues={emergencyIssues} workers={workers} onAssign={handleAssignWorker} getWorkerName={getWorkerName} />
-            </CardContent>
-        </Card>
-       )}
-
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Manage Waste Complaints</CardTitle>
-          <CardDescription>
-            Assign workers to unresolved standard waste complaints.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <IssueTable issues={normalOpenIssues} workers={workers} onAssign={handleAssignWorker} getWorkerName={getWorkerName} />
-        </CardContent>
-      </Card>
+                <Card>
+                    <CardHeader>
+                    <CardTitle>Manage Standard Complaints</CardTitle>
+                    <CardDescription>
+                        Assign workers to unresolved standard waste complaints.
+                    </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                    <IssueTable issues={normalOpenIssues} workers={workers} onAssign={handleAssignWorker} getWorkerName={getWorkerName} />
+                    </CardContent>
+                </Card>
+            </TabsContent>
+             <TabsContent value="orders" className="space-y-4 mt-4">
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>Buyer Order Management</CardTitle>
+                        <CardDescription>Review, approve, and track orders for recycled materials from buyers.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Order</TableHead>
+                                    <TableHead>Buyer</TableHead>
+                                    <TableHead>Delivery Location</TableHead>
+                                    <TableHead>Deadline</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {orders.map(order => (
+                                    <TableRow key={order.id}>
+                                        <TableCell>
+                                            <div className="font-medium">{order.product}</div>
+                                            <div className="text-sm text-muted-foreground">{order.quantity} Tons</div>
+                                        </TableCell>
+                                        <TableCell>{order.buyerName}</TableCell>
+                                        <TableCell>{order.location}</TableCell>
+                                        <TableCell>{format(new Date(order.deadline), 'MMM d, yyyy')}</TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline" className={cn('gap-2', orderStatusConfig[order.status].color)}>
+                                                {orderStatusConfig[order.status].icon}
+                                                {order.status}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            {order.status === 'Pending Approval' && (
+                                                <div className="flex gap-2 justify-end">
+                                                    <Button size="sm" variant="outline" onClick={() => handleOrderStatusChange(order.id, 'Approved')}>
+                                                        <Check className="h-4 w-4 mr-1"/> Approve
+                                                    </Button>
+                                                    <Button size="sm" variant="destructive" onClick={() => handleOrderStatusChange(order.id, 'Denied')}>
+                                                        <X className="h-4 w-4 mr-1"/> Deny
+                                                    </Button>
+                                                </div>
+                                            )}
+                                            {(order.status === 'Approved' || order.status === 'In Transit') && (
+                                                <Button size="sm" variant="outline" onClick={() => handleOrderStatusChange(order.id, order.status === 'Approved' ? 'In Transit' : 'Delivered')}>
+                                                   {order.status === 'Approved' ? <Truck className="h-4 w-4 mr-1"/> : <CheckCircle className="h-4 w-4 mr-1"/>}
+                                                    {order.status === 'Approved' ? 'Mark as Shipped' : 'Mark as Delivered'}
+                                                </Button>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                 </Card>
+            </TabsContent>
+       </Tabs>
     </div>
   )
 }
@@ -297,3 +365,5 @@ const IssueTable = ({ issues, workers, onAssign, getWorkerName }: { issues: Issu
           </Table>
     )
 }
+
+    

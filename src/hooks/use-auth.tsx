@@ -56,9 +56,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // This effect runs whenever the language changes.
   useEffect(() => {
-    if (user) {
+    const storedUser = sessionStorage.getItem('user');
+    if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
         // When language changes, re-translate the user's name and update the state.
-        setUser(getTranslatedUser(user));
+        setUser(getTranslatedUser(parsedUser));
     }
   }, [language, t]);
 
@@ -78,8 +80,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         mobileNumber: foundUser.mobileNumber,
         score: foundUser.score,
       };
-      setUser(getTranslatedUser(appUser));
       sessionStorage.setItem('user', JSON.stringify(appUser));
+      setUser(getTranslatedUser(appUser));
     } else {
       throw new Error('Invalid email or password.');
     }
@@ -104,8 +106,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         mobileNumber: foundUser.mobileNumber,
         score: foundUser.score,
       };
-      setUser(getTranslatedUser(appUser));
       sessionStorage.setItem('user', JSON.stringify(appUser));
+      setUser(getTranslatedUser(appUser));
     } else {
       throw new Error('No user found with this mobile number.');
     }
@@ -141,8 +143,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Add to mock users array to allow login later in the session
     mockUsers.push({ ...newUser, password: pass });
 
-    setUser(getTranslatedUser(newUser));
     sessionStorage.setItem('user', JSON.stringify(newUser));
+    setUser(getTranslatedUser(newUser));
   };
 
 

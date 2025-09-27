@@ -199,7 +199,7 @@ export const extendSla = async (issueId: string, reason: string): Promise<Issue>
 
 export const getWorkers = async (): Promise<Worker[]> => {
   await new Promise(resolve => setTimeout(resolve, 500));
-  return mockWorkers;
+  return mockWorkers.map(w => ({...w}));
 };
 
 
@@ -208,7 +208,7 @@ export const getWorkers = async (): Promise<Worker[]> => {
 export const getUserProfile = async (uid: string): Promise<AppUser | null> => {
     await new Promise(resolve => setTimeout(resolve, 500));
     const user = mockUsers.find(u => u.uid === uid);
-    return user || null;
+    return user ? {...user} : null;
 }
 
 
@@ -218,7 +218,7 @@ export const updateUserScore = async (uid: string, points: number): Promise<AppU
     if (user) {
         user.score = (user.score || 0) + points;
         console.log(`(Mock) User ${user.name}'s score is now ${user.score}`);
-        return user;
+        return {...user};
     }
     return null;
 }

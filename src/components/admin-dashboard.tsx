@@ -27,7 +27,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { getIssues, getWorkers, updateIssueAssignment } from '@/lib/firebase-service';
 import type { Issue, Worker, SlaStatus } from '@/lib/types';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { ListChecks, Users, AlertTriangle, Clock, Map, Trash2, Percent, ShoppingBag, Truck, Check, X, CheckCircle } from 'lucide-react';
@@ -251,7 +251,7 @@ export function AdminDashboard() {
                                     <TableHead>Order</TableHead>
                                     <TableHead>Buyer</TableHead>
                                     <TableHead>Delivery Location</TableHead>
-                                    <TableHead>Deadline</TableHead>
+                                    <TableHead>Time Left / Deadline</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
@@ -265,7 +265,10 @@ export function AdminDashboard() {
                                         </TableCell>
                                         <TableCell>{order.buyerName}</TableCell>
                                         <TableCell>{order.location}</TableCell>
-                                        <TableCell>{format(new Date(order.deadline), 'MMM d, yyyy')}</TableCell>
+                                        <TableCell>
+                                            <div className="font-medium">{formatDistanceToNow(parseISO(order.deadline), { addSuffix: true })}</div>
+                                            <div className="text-sm text-muted-foreground">{format(parseISO(order.deadline), 'MMM d, yyyy')}</div>
+                                        </TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className={cn('gap-2', orderStatusConfig[order.status].color)}>
                                                 {orderStatusConfig[order.status].icon}

@@ -25,10 +25,10 @@ import { GraduationCap, Award, Recycle, CheckCircle, Lightbulb, Star, Info, Pack
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import Confetti from 'react-confetti';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 
 // Helper to reorder lists
-const reorder = (list, startIndex, endIndex) => {
+const reorder = (list: any[], startIndex: number, endIndex: number) => {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
@@ -36,7 +36,7 @@ const reorder = (list, startIndex, endIndex) => {
 };
 
 // Helper to move items between lists
-const move = (source, destination, droppableSource, droppableDestination) => {
+const move = (source: any[], destination: any[], droppableSource: any, droppableDestination: any) => {
   const sourceClone = Array.from(source);
   const destClone = Array.from(destination);
   const [removed] = sourceClone.splice(droppableSource.index, 1);
@@ -84,15 +84,15 @@ const modules = [
   },
 ];
 
-const WasteSortingGame = ({ onGameComplete }) => {
+const WasteSortingGame = ({ onGameComplete }: { onGameComplete: () => void }) => {
     const [state, setState] = useState({
         items: initialWasteItems,
-        'Dry Waste': [],
-        'Wet Waste': [],
+        'Dry Waste': [] as typeof initialWasteItems,
+        'Wet Waste': [] as typeof initialWasteItems,
     });
-    const [feedback, setFeedback] = useState({});
+    const [feedback, setFeedback] = useState<Record<string, 'correct' | 'incorrect'>>({});
 
-    const onDragEnd = result => {
+    const onDragEnd = (result: DropResult) => {
         const { source, destination } = result;
 
         if (!destination) return;
@@ -100,55 +100,67 @@ const WasteSortingGame = ({ onGameComplete }) => {
         const sourceId = source.droppableId;
         const destId = destination.droppableId;
 
-        const item = state[sourceId][source.index];
+        const sourceItems = state[sourceId as keyof typeof state];
+        const item = Array.isArray(sourceItems) ? sourceItems[source.index] : undefined;
+
+        if (!item) return;
 
         if (sourceId === destId) {
-             const items = reorder(state[sourceId], source.index, destination.index);
+             const items = reorder(sourceItems, source.index, destination.index);
              setState(prevState => ({ ...prevState, [sourceId]: items }));
         } else {
-             const result = move(state[sourceId], state[destId], source, destination);
-             setState(prevState => ({ ...prevState, ...result }));
+             const destItems = state[destId as keyof typeof state];
+             if (Array.isArray(sourceItems) && Array.isArray(destItems)) {
+                const moveResult = move(sourceItems, destItems, source, destination);
+                setState(prevState => ({ ...prevState, ...moveResult }));
 
-             if (item.type === destId) {
-                setFeedback(prev => ({...prev, [item.id]: 'correct'}));
-             } else {
-                setFeedback(prev => ({...prev, [item.id]: 'incorrect'}));
+                if (item.type === destId) {
+                    setFeedback(prev => ({...prev, [item.id]: 'correct'}));
+                } else {
+                    setFeedback(prev => ({...prev, [item.id]: 'incorrect'}));
+                }
              }
         }
     };
     
     useEffect(() => {
         if (state.items.length === 0) {
-            const allCorrect = Object.values(feedback).every(f => f === 'correct');
-            if (allCorrect) {
+            const allPlacedItems = [...state['Dry Waste'], ...state['Wet Waste']];
+            const allCorrect = allPlacedItems.every(item => feedback[item.id] === 'correct');
+            if (allCorrect && allPlacedItems.length === initialWasteItems.length) {
                 onGameComplete();
             }
         }
     }, [state, feedback, onGameComplete]);
 
-    const getList = (id) => state[id];
+    const getList = (id: 'items' | 'Dry Waste' | 'Wet Waste') => state[id];
+
+    const renderDraggableItem = (item: any, index: number) => (
+         <Draggable key={item.id} draggableId={item.id} index={index}>
+            {(provided, snapshot) => (
+                <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    className={cn("p-2 mb-2 bg-white rounded-md shadow flex items-center gap-2", 
+                        feedback[item.id] === 'correct' && 'border-2 border-green-500',
+                        feedback[item.id] === 'incorrect' && 'border-2 border-red-500'
+                    )}
+                >
+                    {item.icon} {item.content}
+                </div>
+            )}
+        </Draggable>
+    )
 
     return (
         <DragDropContext onDragEnd={onDragEnd}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Droppable droppableId="items">
-                    {(provided, snapshot) => (
+                    {(provided) => (
                         <div ref={provided.innerRef} {...provided.droppableProps} className="p-4 bg-muted/50 rounded-lg min-h-[200px]">
                             <h4 className="font-semibold mb-3 text-center">Waste Items</h4>
-                            {getList('items').map((item, index) => (
-                                <Draggable key={item.id} draggableId={item.id} index={index}>
-                                    {(provided, snapshot) => (
-                                        <div
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                            className="p-2 mb-2 bg-white rounded-md shadow flex items-center gap-2"
-                                        >
-                                            {item.icon} {item.content}
-                                        </div>
-                                    )}
-                                </Draggable>
-                            ))}
+                            {getList('items').map(renderDraggableItem)}
                             {provided.placeholder}
                         </div>
                     )}
@@ -162,16 +174,7 @@ const WasteSortingGame = ({ onGameComplete }) => {
                             className={cn("p-4 rounded-lg min-h-[200px] transition-colors", snapshot.isDraggingOver ? 'bg-blue-100' : 'bg-blue-50')}
                         >
                             <h4 className="font-semibold mb-3 text-center text-blue-800">Dry Waste Bin</h4>
-                            {getList('Dry Waste').map((item, index) => (
-                               <div
-                                    className={cn("p-2 mb-2 bg-white rounded-md shadow flex items-center gap-2", 
-                                        feedback[item.id] === 'correct' && 'border-2 border-green-500',
-                                        feedback[item.id] === 'incorrect' && 'border-2 border-red-500'
-                                    )}
-                                >
-                                    {item.icon} {item.content}
-                                </div>
-                            ))}
+                            {getList('Dry Waste').map(renderDraggableItem)}
                             {provided.placeholder}
                         </div>
                     )}
@@ -185,23 +188,14 @@ const WasteSortingGame = ({ onGameComplete }) => {
                             className={cn("p-4 rounded-lg min-h-[200px] transition-colors", snapshot.isDraggingOver ? 'bg-green-100' : 'bg-green-50')}
                         >
                             <h4 className="font-semibold mb-3 text-center text-green-800">Wet Waste Bin</h4>
-                             {getList('Wet Waste').map((item, index) => (
-                                <div
-                                    className={cn("p-2 mb-2 bg-white rounded-md shadow flex items-center gap-2", 
-                                        feedback[item.id] === 'correct' && 'border-2 border-green-500',
-                                        feedback[item.id] === 'incorrect' && 'border-2 border-red-500'
-                                    )}
-                                >
-                                    {item.icon} {item.content}
-                                </div>
-                            ))}
+                             {getList('Wet Waste').map(renderDraggableItem)}
                             {provided.placeholder}
                         </div>
                     )}
                 </Droppable>
             </div>
              {state.items.length === 0 && !Object.values(feedback).every(f => f === 'correct') && (
-                <p className="text-red-600 text-center mt-2 font-semibold">
+                <p className="text-red-600 text-center mt-4 font-semibold">
                     Some items are in the wrong bin. Please correct them to complete the module.
                 </p>
             )}
@@ -315,7 +309,7 @@ export default function TrainingPage() {
                     <div className="p-4 bg-muted/50 rounded-lg">
                        <h4 className="font-semibold mb-3 flex items-center gap-2">
                         <Info className="h-5 w-5" />
-                        {module.quiz ? 'Mini Quiz' : 'Drag each item to the correct bin below.'}
+                        {module.id === 'segregation' ? 'Drag each item to the correct bin below.' : 'Mini Quiz'}
                       </h4>
                       {module.id === 'segregation' && isClient && (
                          <WasteSortingGame onGameComplete={() => handleCompleteModule('segregation')} />

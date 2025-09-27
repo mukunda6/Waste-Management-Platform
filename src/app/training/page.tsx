@@ -166,7 +166,10 @@ export default function TrainingPage() {
     const sourceId = source.droppableId;
     const destId = destination.droppableId;
     
-    const item = gameState[sourceId as keyof typeof gameState][source.index];
+    const sourceList = gameState[sourceId as keyof typeof gameState];
+    if (!sourceList) return;
+
+    const item = sourceList[source.index];
 
     if (sourceId === destId) {
        if (sourceId !== 'items') return;
@@ -181,8 +184,7 @@ export default function TrainingPage() {
             const result = move(gameState[sourceId as keyof typeof gameState], gameState[destId as keyof typeof gameState], source, destination);
             setGameState(prev => ({
                 ...prev,
-                [sourceId]: result[sourceId as keyof typeof result],
-                [destId]: result[destId as keyof typeof result],
+                ...result
             }));
         } else {
              toast({
@@ -294,9 +296,18 @@ export default function TrainingPage() {
                                     </CardTitle>
                                      <div className="space-y-2">
                                        {gameState['Dry Waste'].map((item, index) => (
-                                            <div key={item.id} className="p-3 bg-card rounded-md shadow-sm flex items-center justify-center text-3xl">
-                                                {item.emoji}
-                                            </div>
+                                            <Draggable key={item.id} draggableId={item.id} index={index}>
+                                                {(provided) => (
+                                                    <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                        className="p-3 bg-card rounded-md shadow-sm flex items-center justify-center text-3xl"
+                                                    >
+                                                        {item.emoji}
+                                                    </div>
+                                                )}
+                                            </Draggable>
                                         ))}
                                         {provided.placeholder}
                                     </div>
@@ -315,9 +326,18 @@ export default function TrainingPage() {
                                     </CardTitle>
                                      <div className="space-y-2">
                                         {gameState['Wet Waste'].map((item, index) => (
-                                             <div key={item.id} className="p-3 bg-card rounded-md shadow-sm flex items-center justify-center text-3xl">
-                                                {item.emoji}
-                                            </div>
+                                             <Draggable key={item.id} draggableId={item.id} index={index}>
+                                                {(provided) => (
+                                                    <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                        className="p-3 bg-card rounded-md shadow-sm flex items-center justify-center text-3xl"
+                                                    >
+                                                        {item.emoji}
+                                                    </div>
+                                                )}
+                                            </Draggable>
                                         ))}
                                         {provided.placeholder}
                                     </div>

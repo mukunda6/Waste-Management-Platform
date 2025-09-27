@@ -23,7 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { t } = useLanguage(); // Use language hook to translate names
+  const { t, language } = useLanguage();
 
   const getTranslatedUser = (user: AppUser): AppUser => {
     return {
@@ -33,14 +33,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // In a real app, you'd verify a token here
     const storedUser = sessionStorage.getItem('user');
     if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(getTranslatedUser(parsedUser));
+        const parsedUser = JSON.parse(storedUser);
+        // We set the user object with the name translated to the current language.
+        setUser(getTranslatedUser(parsedUser));
     }
     setLoading(false);
-  }, [t]);
+  }, []);
+
+  // This effect runs whenever the language changes.
+  useEffect(() => {
+    if (user) {
+        // When language changes, re-translate the user's name and update the state.
+        setUser(getTranslatedUser(user));
+    }
+  }, [language, t]);
 
   const login = async (email: string, pass: string) => {
     const foundUser = mockUsers.find(

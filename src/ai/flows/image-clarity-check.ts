@@ -41,7 +41,6 @@ export async function checkImageClarity(
 
 const prompt = ai.definePrompt({
   name: 'checkImageClarityPrompt',
-  model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: CheckImageClarityInputSchema},
   output: {schema: CheckImageClarityOutputSchema},
   prompt: `You are an expert image quality detector and waste classifier.

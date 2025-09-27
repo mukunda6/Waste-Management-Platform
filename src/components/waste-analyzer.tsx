@@ -7,7 +7,7 @@ import { Input } from './ui/input';
 import { Loader2, Upload, ScanLine, Trash2, Recycle, Biohazard } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
-import { analyzeWaste, WasteAnalyzerOutput } from '@/ai/flows/waste-analyzer-flow';
+import type { WasteAnalyzerOutput } from '@/ai/flows/waste-analyzer-flow';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
@@ -62,19 +62,13 @@ export function WasteAnalyzer() {
 
   const handleAnalyze = async (photoDataUri: string) => {
     setIsLoading(true);
-    try {
-      const analysisResult = await analyzeWaste({ photoDataUri });
-      setResult(analysisResult);
-    } catch (error) {
-      console.error('Waste analysis failed:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Analysis Failed',
-        description: 'Could not analyze the image. Please try again.',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    // Simulate a short delay for UX
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setResult({
+        wasteType: 'Dry Waste',
+        reason: 'This is a mock analysis result.'
+    });
+    setIsLoading(false);
   };
   
   const uniqueId = "waste-analyzer-upload";

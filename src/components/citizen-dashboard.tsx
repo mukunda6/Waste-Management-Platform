@@ -30,37 +30,6 @@ const wasteCategories: { category: IssueCategory; icon: React.ReactNode; descrip
     { category: 'Non-segregation of Waste', icon: <Recycle className="h-8 w-8" />, description: 'Mixed waste not segregated.' },
 ];
 
-const freeProducts = [
-    {
-        icon: <Download className="h-6 w-6 text-primary" />,
-        name: 'Free Segregation Guide',
-        description: 'Download and print a guide for your kitchen.',
-        cost: 'Free',
-    },
-    {
-        icon: <Gift className="h-6 w-6 text-primary" />,
-        name: 'Community Exchange Coupon',
-        description: 'Bring 10 plastic bottles to a center for a reward.',
-        cost: 'Exchange',
-    },
-];
-
-const premiumProducts = [
-     {
-        icon: <Star className="h-6 w-6 text-yellow-500" />,
-        name: 'Low-Cost Compost Starter',
-        description: 'A basic bin with bio-culture to begin composting.',
-        cost: '150 Coins',
-    },
-    {
-        icon: <Gem className="h-6 w-6 text-indigo-500" />,
-        name: 'Designer Bamboo Composter',
-        description: 'A stylish and eco-friendly bin for your modern kitchen.',
-        cost: '800 Coins',
-    },
-];
-
-
 export function CitizenDashboard() {
   const { user } = useAuth();
   const router = useRouter();
@@ -175,49 +144,6 @@ export function CitizenDashboard() {
                     </Button>
                 </div>
             </Card>
-             <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><ShoppingCart /> Inclusive Compost Kit Shop</CardTitle>
-                    <CardDescription>Use your coins to get products that help you manage waste better.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div>
-                        <h4 className="font-semibold text-sm mb-2">Free & Essential Items</h4>
-                        <div className="space-y-3">
-                        {freeProducts.map(product => (
-                            <div key={product.name} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
-                                <div className="flex items-center gap-3">
-                                    {product.icon}
-                                    <div>
-                                        <p className="font-medium text-sm">{product.name}</p>
-                                        <p className="text-xs text-muted-foreground">{product.description}</p>
-                                    </div>
-                                </div>
-                                <Button size="sm" variant="outline">{product.cost}</Button>
-                            </div>
-                        ))}
-                        </div>
-                    </div>
-                    <Separator />
-                     <div>
-                        <h4 className="font-semibold text-sm mb-2">Redeem With Coins</h4>
-                        <div className="space-y-3">
-                        {premiumProducts.map(product => (
-                            <div key={product.name} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
-                               <div className="flex items-center gap-3">
-                                    {product.icon}
-                                    <div>
-                                        <p className="font-medium text-sm">{product.name}</p>
-                                        <p className="text-xs text-muted-foreground">{product.description}</p>
-                                    </div>
-                                </div>
-                                <Button size="sm">{product.cost}</Button>
-                            </div>
-                        ))}
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
         </div>
       
       <div className="grid gap-4 md:grid-cols-3">
@@ -291,5 +217,3 @@ export function CitizenDashboard() {
     </div>
   );
 }
-
-  

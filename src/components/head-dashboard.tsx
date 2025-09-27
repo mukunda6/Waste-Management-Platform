@@ -83,10 +83,10 @@ const wasteChartConfig = {
 
 
 const cityData = [
-    { city: 'Zone A', segregationRate: 85, landfillLoad: 1200 },
-    { city: 'Zone B', segregationRate: 72, landfillLoad: 1500 },
-    { city: 'Zone C', segregationRate: 91, landfillLoad: 950 },
-    { city: 'Zone D', segregationRate: 65, landfillLoad: 1800 },
+    { city: 'Charminar', segregationRate: 85, landfillLoad: 1200 },
+    { city: 'Kukatpally', segregationRate: 72, landfillLoad: 1500 },
+    { city: 'Serilingampally', segregationRate: 91, landfillLoad: 950 },
+    { city: 'L.B. Nagar', segregationRate: 65, landfillLoad: 1800 },
 ];
 const dailyWasteData = { collected: 450, processed: 380, TPD: 450 }; // in Tons
 
@@ -219,7 +219,3 @@ export function HeadDashboard() {
     </div>
   )
 }
-
-    
-
-    

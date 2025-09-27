@@ -11,7 +11,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const WasteAnalyzerInputSchema = z.object({
+const WasteAnalyzerInputSchema = z.object({
   photoDataUri: z
     .string()
     .describe(
@@ -20,7 +20,7 @@ export const WasteAnalyzerInputSchema = z.object({
 });
 export type WasteAnalyzerInput = z.infer<typeof WasteAnalyzerInputSchema>;
 
-export const WasteAnalyzerOutputSchema = z.object({
+const WasteAnalyzerOutputSchema = z.object({
   wasteType: z.enum(['Dry Waste', 'Wet Waste', 'Hazardous Waste', 'Not Waste'])
     .describe('The classified type of waste.'),
   reason: z.string().describe('A brief reason for the classification.')

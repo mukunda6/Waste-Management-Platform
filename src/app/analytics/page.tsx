@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -13,7 +12,7 @@ import { getIssues, getWorkers } from '@/lib/firebase-service';
 import type { Issue } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { BarChart, PieChart, Bar, XAxis, YAxis, Tooltip, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Legend, Pie, PieChart, Cell, Tooltip, XAxis, YAxis } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { useLanguage } from '@/hooks/use-language';
 
@@ -42,6 +41,10 @@ const chartConfig = {
   resolved: {
     label: "Resolved",
     color: "hsl(var(--chart-3))",
+  },
+  count: {
+    label: 'Count',
+    color: 'hsl(var(--chart-1))',
   },
 };
 
@@ -116,12 +119,13 @@ export default function AnalyticsPage() {
       <div className="grid gap-8 lg:grid-cols-3">
         <Card className="lg:col-span-2">
             <CardHeader>
-                <CardTitle>Issues by City</CardTitle>
-                <CardDescription>Breakdown of issue statuses in each city.</CardDescription>
+                <CardTitle>Issue Status by Zone</CardTitle>
+                <CardDescription>Breakdown of issue statuses in each city zone.</CardDescription>
             </CardHeader>
             <CardContent>
                  <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
                      <BarChart data={cityData} accessibilityLayer>
+                        <CartesianGrid vertical={false} />
                         <XAxis dataKey="city" tickLine={false} tickMargin={10} axisLine={false} />
                         <YAxis />
                         <Tooltip content={<ChartTooltipContent />} />
@@ -142,12 +146,14 @@ export default function AnalyticsPage() {
                 <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
                     <PieChart>
                         <Tooltip content={<ChartTooltipContent hideLabel />} />
-                        <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90}>
-                             {pieChartData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={chartConfig[entry.name as keyof typeof chartConfig]?.color || '#8884d8'} />
-                            ))}
-                        </Pie>
                         <Legend />
+                        <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90}>
+                             {pieChartData.map((entry, index) => {
+                                const key = entry.name.replace(/\s+/g, '').toLowerCase() as keyof typeof chartConfig;
+                                const colorKey = chartConfig[key]?.color;
+                                return <Cell key={`cell-${index}`} fill={colorKey || '#8884d8'} />
+                             })}
+                        </Pie>
                     </PieChart>
                 </ChartContainer>
             </CardContent>
@@ -160,12 +166,12 @@ export default function AnalyticsPage() {
                 <CardDescription>Frequency of each issue type reported across the system.</CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={{ count: { label: 'Count', color: 'hsl(var(--chart-1))' } }} className="min-h-[400px] w-full">
-                    <BarChart data={categoryData} layout="vertical" accessibilityLayer>
+                <ChartContainer config={chartConfig} className="min-h-[400px] w-full">
+                    <BarChart data={categoryData} layout="vertical" accessibilityLayer margin={{left: 100}}>
+                        <CartesianGrid horizontal={false} />
                         <YAxis 
                             dataKey="name" 
                             type="category"
-                            width={250}
                             tickLine={false}
                             axisLine={false}
                         />

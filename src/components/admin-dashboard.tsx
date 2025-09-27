@@ -158,7 +158,7 @@ export function AdminDashboard() {
 
   return (
     <div className="grid gap-8">
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Open Issues</CardTitle>
@@ -197,6 +197,43 @@ export function AdminDashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{unassignedIssues.length}</div>
             <p className="text-xs text-muted-foreground">Complaints needing worker assignment.</p>
+          </CardContent>
+        </Card>
+      </div>
+
+       <div className="grid gap-8 md:grid-cols-2">
+         <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Percent /> Segregation Compliance by Zone</CardTitle>
+                <CardDescription>Percentage of households following waste segregation rules.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <ChartContainer config={{}} className="h-64 w-full">
+                    <BarChart data={segregationData} accessibilityLayer>
+                        <CartesianGrid vertical={false} />
+                        <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} />
+                        <YAxis stroke="hsl(var(--primary))" name="Segregation" unit="%"/>
+                        <Tooltip cursor={{fill: 'hsl(var(--muted))'}} content={<ChartTooltipContent />} />
+                        <Bar dataKey="compliance" fill="hsl(var(--primary))" name="Compliance %" radius={4}>
+                        </Bar>
+                    </BarChart>
+                </ChartContainer>
+            </CardContent>
+        </Card>
+         <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Trash2 /> Daily Waste Analytics</CardTitle>
+            <CardDescription>Overview of today's total waste collected and processed.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-around items-center h-64">
+              <div className="text-center">
+                  <p className="text-4xl font-bold">{dailyWasteData.collected}</p>
+                  <p className="text-muted-foreground">Tons Collected</p>
+              </div>
+              <div className="text-center">
+                  <p className="text-4xl font-bold">{dailyWasteData.processed}</p>
+                  <p className="text-muted-foreground">Tons Processed</p>
+              </div>
           </CardContent>
         </Card>
       </div>
@@ -368,6 +405,3 @@ const IssueTable = ({ issues, workers, onAssign, getWorkerName }: { issues: Issu
           </Table>
     )
 }
-
-    
-    

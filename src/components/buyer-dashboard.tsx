@@ -37,7 +37,7 @@ const wasteStreams: WasteStreamData[] = [
         totalTons: 1250,
         icon: <Leaf className="h-6 w-6 text-green-500" />,
         location: 'Amberpet Composting Plant',
-        leadTime: '30-45 Days',
+        leadTime: '10-15 Days',
         potential: [
             { name: 'Organic Compost', value: 750, fill: 'var(--color-compost)', pricePerTon: 50 },
             { name: 'Biogas Feedstock', value: 400, fill: 'var(--color-biogas)', pricePerTon: 20 },
@@ -49,7 +49,7 @@ const wasteStreams: WasteStreamData[] = [
         totalTons: 800,
         icon: <Recycle className="h-6 w-6 text-blue-500" />,
         location: 'Jeedimetla Recycling Hub',
-        leadTime: '7-14 Days',
+        leadTime: '5-7 Days',
         potential: [
             { name: 'PET/HDPE Pellets', value: 400, fill: 'var(--color-plastic)', pricePerTon: 200 },
             { name: 'Cardboard Bales', value: 250, fill: 'var(--color-paper)', pricePerTon: 80 },

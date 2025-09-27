@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,6 @@ import {
   DialogTrigger,
   DialogDescription,
   DialogFooter,
-  DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -27,7 +26,6 @@ interface WasteLogDialogProps {
 export function WasteLogDialog({ wasteType }: WasteLogDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [analysisResult, setAnalysisResult] = useState<{
     correct: boolean;
     reason: string;
@@ -35,25 +33,7 @@ export function WasteLogDialog({ wasteType }: WasteLogDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-      setAnalysisResult(null); // Reset previous result
-    }
-  };
-
-  const handleVerify = async () => {
-    if (!imageFile) {
-      toast({
-        variant: 'destructive',
-        title: 'No Image',
-        description: 'Please upload a photo of your waste.',
-      });
-      return;
-    }
-
+  const handleVerify = async (file: File) => {
     setIsLoading(true);
     setAnalysisResult(null);
 
@@ -83,8 +63,9 @@ export function WasteLogDialog({ wasteType }: WasteLogDialogProps) {
             description: result.reason,
           });
         }
+        setIsLoading(false);
       };
-      reader.readAsDataURL(imageFile);
+      reader.readAsDataURL(file);
     } catch (error) {
       console.error('Waste verification failed:', error);
       toast({
@@ -92,17 +73,25 @@ export function WasteLogDialog({ wasteType }: WasteLogDialogProps) {
         title: 'Verification Failed',
         description: 'Could not analyze the image. Please try again.',
       });
-    } finally {
       setIsLoading(false);
     }
   };
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+      setAnalysisResult(null); // Reset previous result
+      handleVerify(file); // Automatically start verification
+    }
+  };
+
   const resetState = () => {
-    setIsOpen(false);
+    // Keep dialog open on close to prevent flicker
     setImagePreview(null);
-    setImageFile(null);
     setAnalysisResult(null);
     setIsLoading(false);
+    setIsOpen(false);
   };
   
   const wasteTypeClasses = {
@@ -155,8 +144,15 @@ export function WasteLogDialog({ wasteType }: WasteLogDialogProps) {
                     accept="image/*"
                     className="hidden"
                     onChange={handleFileChange}
+                    disabled={isLoading}
                 />
             </div>
+            {isLoading && (
+                <div className="p-3 rounded-md text-sm flex items-center justify-center gap-2 bg-muted">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Analyzing Image...
+                </div>
+            )}
             {analysisResult && (
                 <div className={cn("p-3 rounded-md text-sm flex items-center gap-2", 
                     analysisResult.correct ? "bg-green-100 text-green-900" : "bg-red-100 text-red-900"
@@ -167,10 +163,8 @@ export function WasteLogDialog({ wasteType }: WasteLogDialogProps) {
             )}
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={resetState}>Close</Button>
-          <Button onClick={handleVerify} disabled={isLoading || !imageFile}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Verify & Log
+          <Button variant="outline" onClick={resetState}>
+            {analysisResult?.correct ? 'Done' : 'Close'}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -122,8 +122,10 @@ const WasteSortingGame = ({ onGameComplete }: { onGameComplete: () => void }) =>
         if (!item) return;
 
         if (sourceId === destId) {
-             const items = reorder(sourceItems, source.index, destination.index);
-             setState(prevState => ({ ...prevState, [sourceId]: items }));
+             if (Array.isArray(sourceItems)) {
+                const items = reorder(sourceItems, source.index, destination.index);
+                setState(prevState => ({ ...prevState, [sourceId]: items }));
+             }
         } else {
              const destItems = state[destId as keyof typeof state];
              if (Array.isArray(sourceItems) && Array.isArray(destItems)) {
@@ -182,7 +184,7 @@ const WasteSortingGame = ({ onGameComplete }: { onGameComplete: () => void }) =>
                     )}
                 </StrictModeDroppable>
 
-                <StrictModeDroppable droppableId="Dry Waste">
+                <StrictModeDroppable droppableId="Dry Waste" isDropDisabled={false}>
                     {(provided, snapshot) => (
                         <div
                             ref={provided.innerRef}
@@ -196,7 +198,7 @@ const WasteSortingGame = ({ onGameComplete }: { onGameComplete: () => void }) =>
                     )}
                 </StrictModeDroppable>
                 
-                <StrictModeDroppable droppableId="Wet Waste">
+                <StrictModeDroppable droppableId="Wet Waste" isDropDisabled={false}>
                     {(provided, snapshot) => (
                         <div
                             ref={provided.innerRef}

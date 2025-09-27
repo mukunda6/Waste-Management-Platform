@@ -13,13 +13,14 @@ import { Button } from '@/components/ui/button';
 import { getIssuesByUser } from '@/lib/firebase-service';
 import type { Issue, IssueCategory } from '@/lib/types';
 import { IssueCard } from './issue-card';
-import { FilePlus2, Clock, CheckCircle, AlertTriangle, Trash2, Recycle, BookOpen, Droplets, Waves, Car, TreePine, Dog } from 'lucide-react';
+import { FilePlus2, Clock, CheckCircle, AlertTriangle, Trash2, Recycle, BookOpen, Droplets, Waves, Car, TreePine, Dog, ScanLine } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLanguage } from '@/hooks/use-language';
 import { Progress } from './ui/progress';
 import { WasteLogDialog } from './waste-log-dialog';
+import { WasteScannerDialog } from './waste-scanner-dialog';
 
 const reportCategories: { category: IssueCategory; icon: React.ReactNode; description: string; }[] = [
     { category: 'Overflowing Bins', icon: <Trash2 className="h-8 w-8" />, description: 'Public bin is full.'},
@@ -146,6 +147,18 @@ export function CitizenDashboard() {
                     <Button className="w-full" asChild>
                         <Link href="/training"><BookOpen/>Go to Training</Link>
                     </Button>
+                </div>
+            </Card>
+             <Card className="flex flex-col">
+                <CardHeader>
+                    <CardTitle>Waste Scanner</CardTitle>
+                    <CardDescription>Scan an item to find out how to dispose of it correctly.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col justify-center items-center">
+                     <ScanLine className="h-16 w-16 text-primary" />
+                </CardContent>
+                <div className="p-6 pt-0">
+                   <WasteScannerDialog />
                 </div>
             </Card>
         </div>

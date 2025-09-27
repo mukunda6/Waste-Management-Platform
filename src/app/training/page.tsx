@@ -184,7 +184,7 @@ const WasteSortingGame = ({ onGameComplete }: { onGameComplete: () => void }) =>
                     )}
                 </StrictModeDroppable>
 
-                <StrictModeDroppable droppableId="Dry Waste" isDropDisabled={false}>
+                <StrictModeDroppable droppableId="Dry Waste">
                     {(provided, snapshot) => (
                         <div
                             ref={provided.innerRef}
@@ -198,7 +198,7 @@ const WasteSortingGame = ({ onGameComplete }: { onGameComplete: () => void }) =>
                     )}
                 </StrictModeDroppable>
                 
-                <StrictModeDroppable droppableId="Wet Waste" isDropDisabled={false}>
+                <StrictModeDroppable droppableId="Wet Waste">
                     {(provided, snapshot) => (
                         <div
                             ref={provided.innerRef}
@@ -372,3 +372,5 @@ export default function TrainingPage() {
     </>
   );
 }
+
+    

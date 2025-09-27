@@ -21,11 +21,12 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { GraduationCap, Award, Recycle, CheckCircle, Lightbulb, Star } from 'lucide-react';
+import { GraduationCap, Award, Recycle, CheckCircle, Lightbulb, Star, Gamepad2, Timer } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Confetti from 'react-confetti';
 import { useAuth } from '@/hooks/use-auth';
 import { updateUserScore } from '@/lib/firebase-service';
+import { cn } from '@/lib/utils';
 
 const modules = [
   {
@@ -66,6 +67,14 @@ const modules = [
     },
     badge: { name: 'Reuse Rockstar', icon: <Lightbulb className="h-4 w-4" /> },
     points: 25,
+  },
+  {
+    id: 'game',
+    title: 'Waste Sorting Challenge',
+    description: 'Test your knowledge in a fun, timed sorting game!',
+    content: 'This challenge will test your ability to quickly classify different types of waste. For each item, choose the correct bin: Dry, Wet, or Hazardous. Try to get as many correct as you can before the time runs out!',
+    badge: { name: 'Sorting Pro', icon: <Gamepad2 className="h-4 w-4" /> },
+    points: 50,
   },
 ];
 
@@ -173,10 +182,9 @@ export default function TrainingPage() {
                   <AccordionContent className="space-y-6 pt-4">
                     <p className="text-muted-foreground">{module.content}</p>
                     
-                    <div className="p-4 bg-muted/50 rounded-lg space-y-4">
-                      <h4 className="font-semibold">Mini Quiz</h4>
-                      {module.quiz && (
-                        <>
+                    {module.quiz && (
+                        <div className="p-4 bg-muted/50 rounded-lg space-y-4">
+                            <h4 className="font-semibold">Mini Quiz</h4>
                             <p className="mb-2">{module.quiz.question}</p>
                             <RadioGroup onValueChange={(value) => handleQuizAnswer(module.id, value)} disabled={completedModules.includes(module.id)}>
                                 {module.quiz.options.map(option => (
@@ -186,10 +194,11 @@ export default function TrainingPage() {
                                 </div>
                                 ))}
                             </RadioGroup>
-                        </>
-                      )}
-                    </div>
+                        </div>
+                    )}
                     
+                    {module.id === 'game' && <WasteSortingGame onComplete={() => handleCompleteModule('game')} isCompleted={completedModules.includes('game')} />}
+
                     {completedModules.includes(module.id) ? (
                         <div className="flex items-center justify-between p-3 bg-green-100 dark:bg-green-900/20 rounded-lg">
                             <p className="text-sm font-medium text-green-700 dark:text-green-300">Module Completed!</p>
@@ -214,4 +223,108 @@ export default function TrainingPage() {
       </div>
     </>
   );
+}
+
+
+// --- Waste Sorting Game Component ---
+
+const gameItems = [
+    { item: 'Plastic Bottle', type: 'Dry Waste' },
+    { item: 'Vegetable Peels', type: 'Wet Waste' },
+    { item: 'Used Battery', type: 'Hazardous Waste' },
+    { item: 'Newspaper', type: 'Dry Waste' },
+    { item: 'Leftover Food', type: 'Wet Waste' },
+    { item: 'Old Smartphone', type: 'Hazardous Waste' },
+    { item: 'Glass Jar', type: 'Dry Waste' },
+    { item: 'Egg Shells', type: 'Wet Waste' },
+    { item: 'Expired Medicine', type: 'Hazardous Waste' },
+    { item: 'Cardboard Box', type: 'Dry Waste' },
+];
+
+const binTypes = ['Dry Waste', 'Wet Waste', 'Hazardous Waste'] as const;
+
+function WasteSortingGame({ onComplete, isCompleted }: { onComplete: () => void, isCompleted: boolean }) {
+    const [gameState, setGameState] = useState<'idle' | 'playing' | 'finished'>('idle');
+    const [currentItemIndex, setCurrentItemIndex] = useState(0);
+    const [score, setScore] = useState(0);
+    const [timeLeft, setTimeLeft] = useState(30);
+
+    useEffect(() => {
+        if (gameState !== 'playing' || timeLeft <= 0) return;
+        const timerId = setInterval(() => {
+            setTimeLeft(t => t - 1);
+        }, 1000);
+        return () => clearInterval(timerId);
+    }, [gameState, timeLeft]);
+
+    useEffect(() => {
+        if (timeLeft === 0) {
+            setGameState('finished');
+        }
+    }, [timeLeft]);
+
+    const startGame = () => {
+        setGameState('playing');
+        setCurrentItemIndex(0);
+        setScore(0);
+        setTimeLeft(30);
+    };
+
+    const handleAnswer = (answer: typeof binTypes[number]) => {
+        if (gameItems[currentItemIndex].type === answer) {
+            setScore(s => s + 1);
+        }
+        if (currentItemIndex < gameItems.length - 1) {
+            setCurrentItemIndex(i => i + 1);
+        } else {
+            setGameState('finished');
+        }
+    };
+    
+    if (isCompleted) {
+        return null; // Don't show game if module is completed
+    }
+
+    if (gameState === 'idle') {
+        return <Button onClick={startGame}><Gamepad2 className="mr-2" />Start Sorting Challenge</Button>;
+    }
+    
+    if (gameState === 'finished') {
+        const isWin = score >= 5;
+        return (
+            <div className="p-4 bg-muted/50 rounded-lg space-y-4 text-center">
+                <h3 className="font-bold text-lg">Challenge Over!</h3>
+                <p>You scored: <span className="font-bold text-primary">{score} / {gameItems.length}</span></p>
+                {isWin ? (
+                    <>
+                        <p className="text-green-600">Great job! You passed the challenge.</p>
+                        <Button onClick={onComplete}>Complete Module & Earn Badge</Button>
+                    </>
+                ) : (
+                    <>
+                        <p className="text-red-600">You need a score of 5 or more to pass. Try again!</p>
+                        <Button onClick={startGame}>Play Again</Button>
+                    </>
+                )}
+            </div>
+        )
+    }
+
+    return (
+        <div className="p-4 bg-muted/50 rounded-lg space-y-4">
+            <div className="flex justify-between items-center font-mono">
+                <div>Score: <span className="font-bold">{score}</span></div>
+                <div className="flex items-center gap-2 text-red-500"><Timer/> <span className="font-bold">{timeLeft}s</span></div>
+            </div>
+            <div className="text-center bg-background p-6 rounded-md">
+                <p className="text-muted-foreground">Which bin does this go in?</p>
+                <p className="text-2xl font-bold my-2">{gameItems[currentItemIndex].item}</p>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+                <Button variant="outline" onClick={() => handleAnswer('Dry Waste')}>Dry Waste</Button>
+                <Button variant="outline" onClick={() => handleAnswer('Wet Waste')}>Wet Waste</Button>
+                <Button variant="outline" onClick={() => handleAnswer('Hazardous Waste')}>Hazardous</Button>
+            </div>
+        </div>
+    )
 }

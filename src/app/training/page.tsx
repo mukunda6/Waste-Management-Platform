@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -20,42 +20,21 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import Image from 'next/image';
-import { GraduationCap, Award, Recycle, CheckCircle, Lightbulb, Star, Info, Package, Apple, Newspaper } from 'lucide-react';
+import { GraduationCap, Award, Recycle, CheckCircle, Lightbulb, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 import Confetti from 'react-confetti';
-import { DragDropContext, Droppable, Draggable, DropResult, DroppableProps } from 'react-beautiful-dnd';
-
-// Helper to reorder lists
-const reorder = (list: any[], startIndex: number, endIndex: number) => {
-  const result = Array.from(list);
-  const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
-  return result;
-};
-
-// Helper to move items between lists
-const move = (source: any[], destination: any[], droppableSource: any, droppableDestination: any) => {
-  const sourceClone = Array.from(source);
-  const destClone = Array.from(destination);
-  const [removed] = sourceClone.splice(droppableSource.index, 1);
-  destClone.splice(droppableDestination.index, 0, removed);
-  return { [droppableSource.droppableId]: sourceClone, [droppableDestination.droppableId]: destClone };
-};
-
-const initialWasteItems = [
-    { id: 'item-1', content: 'Plastic Bottle', type: 'Dry Waste', icon: <Package/> },
-    { id: 'item-2', content: 'Apple Core', type: 'Wet Waste', icon: <Apple/> },
-    { id: 'item-3', content: 'Newspaper', type: 'Dry Waste', icon: <Newspaper/> },
-];
 
 const modules = [
   {
     id: 'segregation',
-    title: 'Game: Waste Segregation 101',
+    title: 'Waste Segregation 101',
     description: 'Learn to separate waste into Dry, Wet, and Hazardous categories.',
     content: 'Properly separating waste at its source is the most critical step in effective waste management. This simple habit prevents recyclable materials from being contaminated and reduces the amount of waste sent to landfills.',
+    quiz: {
+      question: 'Which of the following is considered "Dry Waste"?',
+      options: ['Vegetable Peels', 'Plastic Bottles', 'Leftover Food'],
+      answer: 'Plastic Bottles',
+    },
     badge: { name: 'Segregation Star', icon: <Star className="h-4 w-4" /> },
   },
   {
@@ -84,155 +63,12 @@ const modules = [
   },
 ];
 
-// Wrapper to fix strict mode issue with react-beautiful-dnd
-const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
-  const [enabled, setEnabled] = useState(false);
-  useEffect(() => {
-    const animation = requestAnimationFrame(() => setEnabled(true));
-    return () => {
-      cancelAnimationFrame(animation);
-      setEnabled(false);
-    };
-  }, []);
-  if (!enabled) {
-    return null;
-  }
-  return <Droppable {...props}>{children}</Droppable>;
-};
-
-const WasteSortingGame = ({ onGameComplete }: { onGameComplete: () => void }) => {
-    const [state, setState] = useState({
-        items: initialWasteItems,
-        'Dry Waste': [] as typeof initialWasteItems,
-        'Wet Waste': [] as typeof initialWasteItems,
-    });
-    const [feedback, setFeedback] = useState<Record<string, 'correct' | 'incorrect'>>({});
-
-    const onDragEnd = (result: DropResult) => {
-        const { source, destination } = result;
-
-        if (!destination) return;
-        
-        const sourceId = source.droppableId;
-        const destId = destination.droppableId;
-
-        const sourceItems = state[sourceId as keyof typeof state];
-        const item = Array.isArray(sourceItems) ? sourceItems[source.index] : undefined;
-
-        if (!item) return;
-
-        if (sourceId === destId) {
-             if (Array.isArray(sourceItems)) {
-                const items = reorder(sourceItems, source.index, destination.index);
-                setState(prevState => ({ ...prevState, [sourceId]: items }));
-             }
-        } else {
-             const destItems = state[destId as keyof typeof state];
-             if (Array.isArray(sourceItems) && Array.isArray(destItems)) {
-                const moveResult = move(sourceItems, destItems, source, destination);
-                setState(prevState => ({ ...prevState, ...moveResult }));
-
-                if (item.type === destId) {
-                    setFeedback(prev => ({...prev, [item.id]: 'correct'}));
-                } else {
-                    setFeedback(prev => ({...prev, [item.id]: 'incorrect'}));
-                }
-             }
-        }
-    };
-    
-    useEffect(() => {
-        if (state.items.length === 0) {
-            const allPlacedItems = [...state['Dry Waste'], ...state['Wet Waste']];
-            const allCorrect = allPlacedItems.every(item => feedback[item.id] === 'correct');
-            if (allCorrect && allPlacedItems.length === initialWasteItems.length) {
-                onGameComplete();
-            }
-        }
-    }, [state, feedback, onGameComplete]);
-
-    const getList = (id: 'items' | 'Dry Waste' | 'Wet Waste') => state[id];
-
-    const renderDraggableItem = (item: any, index: number) => (
-         <Draggable key={item.id} draggableId={item.id} index={index}>
-            {(provided, snapshot) => (
-                <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    className={cn("p-2 mb-2 bg-white rounded-md shadow flex items-center gap-2", 
-                        feedback[item.id] === 'correct' && 'border-2 border-green-500',
-                        feedback[item.id] === 'incorrect' && 'border-2 border-red-500'
-                    )}
-                >
-                    {item.icon} {item.content}
-                </div>
-            )}
-        </Draggable>
-    )
-
-    return (
-        <DragDropContext onDragEnd={onDragEnd}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <StrictModeDroppable droppableId="items">
-                    {(provided) => (
-                        <div ref={provided.innerRef} {...provided.droppableProps} className="p-4 bg-muted/50 rounded-lg min-h-[200px]">
-                            <h4 className="font-semibold mb-3 text-center">Waste Items</h4>
-                            {getList('items').map(renderDraggableItem)}
-                            {provided.placeholder}
-                        </div>
-                    )}
-                </StrictModeDroppable>
-
-                <StrictModeDroppable droppableId="Dry Waste">
-                    {(provided, snapshot) => (
-                        <div
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            className={cn("p-4 rounded-lg min-h-[200px] transition-colors", snapshot.isDraggingOver ? 'bg-blue-100' : 'bg-blue-50')}
-                        >
-                            <h4 className="font-semibold mb-3 text-center text-blue-800">Dry Waste Bin</h4>
-                            {getList('Dry Waste').map(renderDraggableItem)}
-                            {provided.placeholder}
-                        </div>
-                    )}
-                </StrictModeDroppable>
-                
-                <StrictModeDroppable droppableId="Wet Waste">
-                    {(provided, snapshot) => (
-                        <div
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            className={cn("p-4 rounded-lg min-h-[200px] transition-colors", snapshot.isDraggingOver ? 'bg-green-100' : 'bg-green-50')}
-                        >
-                            <h4 className="font-semibold mb-3 text-center text-green-800">Wet Waste Bin</h4>
-                             {getList('Wet Waste').map(renderDraggableItem)}
-                            {provided.placeholder}
-                        </div>
-                    )}
-                </StrictModeDroppable>
-            </div>
-             {state.items.length === 0 && !Object.values(feedback).every(f => f === 'correct') && (
-                <p className="text-red-600 text-center mt-4 font-semibold">
-                    Some items are in the wrong bin. Please correct them to complete the module.
-                </p>
-            )}
-        </DragDropContext>
-    );
-};
-
 
 export default function TrainingPage() {
   const { toast } = useToast();
   const [completedModules, setCompletedModules] = useState<string[]>([]);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
   const [showConfetti, setShowConfetti] = useState(false);
-  
-  // This state is to ensure drag and drop is only enabled on the client
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const progress = (completedModules.length / modules.length) * 100;
   const isAllCompleted = completedModules.length === modules.length;
@@ -320,18 +156,10 @@ export default function TrainingPage() {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="space-y-6 pt-4">
-                    <div>
-                        <p className="text-muted-foreground">{module.content}</p>
-                    </div>
+                    <p className="text-muted-foreground">{module.content}</p>
                     
-                    <div className="p-4 bg-muted/50 rounded-lg">
-                       <h4 className="font-semibold mb-3 flex items-center gap-2">
-                        <Info className="h-5 w-5" />
-                        {module.id === 'segregation' ? 'Drag each item to the correct bin below.' : 'Mini Quiz'}
-                      </h4>
-                      {module.id === 'segregation' && isClient && (
-                         <WasteSortingGame onGameComplete={() => handleCompleteModule('segregation')} />
-                      )}
+                    <div className="p-4 bg-muted/50 rounded-lg space-y-4">
+                      <h4 className="font-semibold">Mini Quiz</h4>
                       {module.quiz && (
                         <>
                             <p className="mb-2">{module.quiz.question}</p>
@@ -372,5 +200,3 @@ export default function TrainingPage() {
     </>
   );
 }
-
-    

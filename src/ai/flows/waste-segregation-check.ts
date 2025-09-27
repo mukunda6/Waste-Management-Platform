@@ -18,7 +18,7 @@ const CheckWasteSegregationInputSchema = z.object({
     .describe(
       "A photo of segregated waste, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
-  expectedWasteType: z.enum(['Dry Waste', 'Wet Waste', 'Hazardous Waste']).describe('The type of waste that is expected to be in the image.'),
+  expectedWasteType: z.enum(['Dry Waste', 'Wet Waste', 'Hazardous Waste']).optional().describe('The type of waste that is expected to be in the image.'),
 });
 export type CheckWasteSegregationInput = z.infer<typeof CheckWasteSegregationInputSchema>;
 
@@ -37,7 +37,7 @@ const prompt = ai.definePrompt({
   name: 'checkWasteSegregationPrompt',
   model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: CheckWasteSegregationInputSchema},
-  output: {schema: CheckWasteSegregationOutputSchema},
+  output: {schema: CheckImageClarityOutputSchema},
   prompt: `Analyze the uploaded image of waste and classify it strictly into one of three categories: Dry, Wet, or Hazardous. Pay close attention to details: if the image contains food, peels, or organic matter, classify as Wet. If it contains plastics, paper, or non-biodegradable items, classify as Dry. If it contains medical, chemical, or sharp objects, classify as Hazardous. Do not accept mismatched inputs (e.g., vegetable waste cannot be Dry). Provide both the predicted category and a short explanation for the classification.
 
 You must determine if the waste in the image is correctly segregated based on the expected waste type.

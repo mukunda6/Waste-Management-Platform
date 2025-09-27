@@ -23,12 +23,19 @@ export type CheckImageClarityInput = z.infer<typeof CheckImageClarityInputSchema
 
 const CheckImageClarityOutputSchema = z.object({
   isClear: z.boolean().describe('Whether or not the image is clear.'),
-  reason: z.string().optional().describe('The reason why the image is not clear, if applicable.'),
-  wasteType: z.enum(['Dry Waste', 'Wet Waste', 'Uncertain']).describe('The classified type of waste in the image.'),
+  reason: z
+    .string()
+    .optional()
+    .describe('The reason why the image is not clear, if applicable.'),
+  wasteType: z
+    .enum(['Dry Waste', 'Wet Waste', 'Hazardous Waste', 'Uncertain'])
+    .describe('The classified type of waste in the image.'),
 });
 export type CheckImageClarityOutput = z.infer<typeof CheckImageClarityOutputSchema>;
 
-export async function checkImageClarity(input: CheckImageClarityInput): Promise<CheckImageClarityOutput> {
+export async function checkImageClarity(
+  input: CheckImageClarityInput
+): Promise<CheckImageClarityOutput> {
   return checkImageClarityFlow(input);
 }
 
@@ -42,7 +49,7 @@ You will use this information to determine if the image is clear enough for asse
 
 1.  **Clarity Check**: An image is considered unclear if it is blurry, too dark, too bright, or if the main subject is obstructed or too far away. Set the isClear output field appropriately. If the image is not clear, provide a brief, user-friendly reason in the reason field (e.g., "Image is too blurry", "It's too dark to see details").
 
-2.  **Waste Classification**: Analyze the content of the image to determine the type of waste. Classify it as 'Dry Waste' (e.g., plastic, paper, metal), 'Wet Waste' (e.g., food scraps, organic material), or 'Uncertain' if you cannot determine. Set the wasteType field.
+2.  **Waste Classification**: Analyze the content of the image to determine the type of waste. Classify it as 'Dry Waste' (e.g., plastic, paper, metal), 'Wet Waste' (e.g., food scraps, organic material), 'Hazardous Waste' (e.g., batteries, broken glass, chemicals), or 'Uncertain' if you cannot determine. Set the wasteType field.
 
 Image: {{media url=photoDataUri}}`,
 });
@@ -58,4 +65,3 @@ const checkImageClarityFlow = ai.defineFlow(
     return output!;
   }
 );
-    

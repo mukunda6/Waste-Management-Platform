@@ -7,6 +7,7 @@ import { mockUsers } from '@/lib/mock-data';
 import type { AppUser } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from './use-language';
+import { updateUserScore, getUserProfile } from '@/lib/firebase-service';
 
 interface AuthContextType {
   user: AppUser | null;
@@ -15,6 +16,7 @@ interface AuthContextType {
   loginWithOtp: (mobileNumber: string, otp: string) => Promise<void>;
   logout: () => Promise<void>;
   signUp: (email: string, pass: string, name: string, role: AppUser['role'], details?: any) => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,6 +33,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       name: t(user.nameKey),
     };
   };
+  
+  const refreshUser = async () => {
+    if (!user) return;
+    const freshUser = await getUserProfile(user.uid);
+    if(freshUser) {
+        setUser(getTranslatedUser(freshUser));
+        sessionStorage.setItem('user', JSON.stringify(freshUser));
+    }
+  }
+
 
   useEffect(() => {
     const storedUser = sessionStorage.getItem('user');
@@ -64,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: foundUser.role,
         avatarUrl: foundUser.avatarUrl,
         mobileNumber: foundUser.mobileNumber,
+        score: foundUser.score,
       };
       setUser(getTranslatedUser(appUser));
       sessionStorage.setItem('user', JSON.stringify(appUser));
@@ -89,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: foundUser.role,
         avatarUrl: foundUser.avatarUrl,
         mobileNumber: foundUser.mobileNumber,
+        score: foundUser.score,
       };
       setUser(getTranslatedUser(appUser));
       sessionStorage.setItem('user', JSON.stringify(appUser));
@@ -121,6 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role,
         avatarUrl: `https://picsum.photos/seed/${name.split(' ')[0]}/100/100`,
         mobileNumber: details.mobileNumber,
+        score: 0,
     };
 
     // Add to mock users array to allow login later in the session
@@ -132,7 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, loginWithOtp, logout, signUp }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithOtp, logout, signUp, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -34,6 +34,7 @@ export interface AppUser {
     role: UserRole;
     avatarUrl: string;
     mobileNumber?: string;
+    score?: number;
 }
 
 export interface Issue {

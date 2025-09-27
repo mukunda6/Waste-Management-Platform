@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -19,6 +20,8 @@ import { Loader2, Upload, CheckCircle, XCircle, GraduationCap } from 'lucide-rea
 import Image from 'next/image';
 import { checkWasteSegregation } from '@/ai/flows/waste-segregation-check';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/use-auth';
+import { updateUserScore } from '@/lib/firebase-service';
 
 interface WasteLogDialogProps {
   wasteType: 'Dry Waste' | 'Wet Waste' | 'Hazardous Waste';
@@ -33,8 +36,10 @@ export function WasteLogDialog({ wasteType }: WasteLogDialogProps) {
   } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user, refreshUser } = useAuth();
 
   const handleVerify = async (file: File) => {
+    if (!user) return;
     setIsLoading(true);
     setAnalysisResult(null);
 
@@ -53,6 +58,8 @@ export function WasteLogDialog({ wasteType }: WasteLogDialogProps) {
         });
 
         if (result.isCorrectlySegregated) {
+          await updateUserScore(user.uid, 10);
+          await refreshUser();
           toast({
             title: 'Verification Successful!',
             description: `You've earned 10 compliance points for correct segregation.`,

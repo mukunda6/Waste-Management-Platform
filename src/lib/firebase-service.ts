@@ -107,6 +107,12 @@ export const addIssue = async (
     };
     
     mockIssues.unshift(newIssue);
+    
+    // Award points
+    const points = data.isEmergency ? 3 + 5 : 3;
+    await updateUserScore(user.uid, points);
+
+    console.log(`(Mock) Awarded ${points} to ${user.name} for new report`);
     console.log("New issue reported (mock):", newIssue);
     
     return newIssue;
@@ -147,6 +153,11 @@ export const addIssueUpdate = async (
 
     issue.status = update.status;
     issue.updates.push(newUpdate);
+
+    if (update.status === 'Resolved') {
+        await updateUserScore(issue.submittedBy.uid, 10);
+        console.log(`(Mock) Awarded 10 bonus points to ${issue.submittedBy.name} for resolved issue`);
+    }
     
     console.log("(Mock) Updated issue:", issue);
     return issue;
@@ -198,4 +209,29 @@ export const getUserProfile = async (uid: string): Promise<AppUser | null> => {
     await new Promise(resolve => setTimeout(resolve, 500));
     const user = mockUsers.find(u => u.uid === uid);
     return user || null;
+}
+
+
+export const updateUserScore = async (uid: string, points: number): Promise<AppUser | null> => {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const user = mockUsers.find(u => u.uid === uid);
+    if (user) {
+        user.score = (user.score || 0) + points;
+        console.log(`(Mock) User ${user.name}'s score is now ${user.score}`);
+        return user;
+    }
+    return null;
+}
+
+export const getAllUserScores = async (): Promise<AppUser[]> => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return mockUsers.filter(u => u.role === 'Citizen').map(u => ({
+        uid: u.uid,
+        name: u.name,
+        nameKey: u.nameKey,
+        email: u.email,
+        role: u.role,
+        avatarUrl: u.avatarUrl,
+        score: u.score || 0,
+    }));
 }

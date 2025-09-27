@@ -50,6 +50,7 @@ import { useRouter } from 'next/navigation';
 import { CameraCapture } from './camera-capture';
 import { cn } from '@/lib/utils';
 import { Alert, AlertTitle } from './ui/alert';
+import { useAuth } from '@/hooks/use-auth';
 
 const allCategories: (IssueCategory | EmergencyCategory)[] = [
     'Garbage Not Collected',
@@ -102,6 +103,7 @@ export function ReportIssueForm({
 }: ReportIssueFormProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { refreshUser } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -242,9 +244,10 @@ export function ReportIssueForm({
 
     try {
         const newIssue = await addIssue({ ...data, isEmergency }, user);
+        await refreshUser(); // Refresh user to get updated score
         toast({
         title: 'Report Submitted!',
-        description: isEmergency ? 'Your emergency report has been prioritized.' : 'Thank you for helping improve your community.',
+        description: isEmergency ? 'Your emergency report has been prioritized and you have received 8 coins!' : 'Thank you for helping! You have received 3 coins.',
         });
         form.reset();
         setImagePreview(null);

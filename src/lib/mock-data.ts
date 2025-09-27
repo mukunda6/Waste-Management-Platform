@@ -14,6 +14,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     password: 'password',
     role: 'Admin',
     avatarUrl: 'https://picsum.photos/seed/admin/100/100',
+    score: 0,
   },
    {
     uid: 'worker-user-01',
@@ -23,6 +24,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     password: 'password',
     role: 'Worker',
     avatarUrl: 'https://picsum.photos/seed/Suresh/100/100',
+    score: 0,
   },
    {
     uid: 'worker-user-02',
@@ -32,6 +34,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     password: 'password',
     role: 'Worker',
     avatarUrl: 'https://picsum.photos/seed/Priya/100/100',
+    score: 0,
   },
   {
     uid: 'buyer-user-01',
@@ -42,6 +45,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     role: 'Buyer',
     avatarUrl: 'https://picsum.photos/seed/buyer/100/100',
     mobileNumber: '9876543213',
+    score: 0,
   },
   {
     uid: 'citizen-user-01',
@@ -52,6 +56,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     role: 'Citizen',
     avatarUrl: 'https://picsum.photos/seed/John/100/100',
     mobileNumber: '9876543210',
+    score: 50,
   },
   {
     uid: 'citizen-user-02',
@@ -62,6 +67,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     role: 'Citizen',
     avatarUrl: 'https://picsum.photos/seed/Jane/100/100',
     mobileNumber: '9876543211',
+    score: 138,
     },
     {
     uid: 'citizen-user-03',
@@ -72,6 +78,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     role: 'Citizen',
     avatarUrl: 'https://picsum.photos/seed/Peter/100/100',
     mobileNumber: '9876543212',
+    score: 75,
     },
     {
     uid: 'citizen-user-04',
@@ -81,6 +88,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     password: 'password',
     role: 'Citizen',
     avatarUrl: 'https://picsum.photos/seed/Mary/100/100',
+    score: 120,
     },
     {
     uid: 'citizen-user-05',
@@ -90,6 +98,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     password: 'password',
     role: 'Citizen',
     avatarUrl: 'https://picsum.photos/seed/David/100/100',
+    score: 95,
     },
     {
     uid: 'citizen-user-06',
@@ -99,6 +108,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     password: 'password',
     role: 'Citizen',
     avatarUrl: 'https://picsum.photos/seed/Susan/100/100',
+    score: 30,
     },
     {
     uid: 'citizen-user-07',
@@ -108,6 +118,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     password: 'password',
     role: 'Citizen',
     avatarUrl: 'https://picsum.photos/seed/Michael/100/100',
+    score: 15,
     },
     {
     uid: 'citizen-user-08',
@@ -117,6 +128,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     password: 'password',
     role: 'Citizen',
     avatarUrl: 'https://picsum.photos/seed/Karen/100/100',
+    score: 88,
     },
     {
     uid: 'citizen-user-09',
@@ -126,6 +138,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     password: 'password',
     role: 'Citizen',
     avatarUrl: 'https://picsum.photos/seed/James/100/100',
+    score: 42,
     },
     {
     uid: 'citizen-user-10',
@@ -135,6 +148,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     password: 'password',
     role: 'Citizen',
     avatarUrl: 'https://picsum.photos/seed/Patricia/100/100',
+    score: 110,
     },
 ];
 

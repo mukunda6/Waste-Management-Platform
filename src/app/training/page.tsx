@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -25,7 +26,8 @@ import { useToast } from '@/hooks/use-toast';
 import Confetti from 'react-confetti';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { cn } from '@/lib/utils';
-
+import { useAuth } from '@/hooks/use-auth';
+import { updateUserScore } from '@/lib/firebase-service';
 
 const modules = [
   {
@@ -39,6 +41,7 @@ const modules = [
       answer: 'Plastic Bottles',
     },
     badge: { name: 'Segregation Star', icon: <Star className="h-4 w-4" /> },
+    points: 25,
   },
   {
     id: 'composting',
@@ -51,6 +54,7 @@ const modules = [
       answer: 'Meat & Dairy',
     },
     badge: { name: 'Compost Champ', icon: <Recycle className="h-4 w-4" /> },
+    points: 25,
   },
   {
     id: 'reuse',
@@ -63,6 +67,7 @@ const modules = [
       answer: 'Bird Feeder',
     },
     badge: { name: 'Reuse Rockstar', icon: <Lightbulb className="h-4 w-4" /> },
+    points: 25,
   },
 ];
 
@@ -99,6 +104,7 @@ const initialColumns = {
 
 export default function TrainingPage() {
   const { toast } = useToast();
+  const { user, refreshUser } = useAuth();
   const [completedModules, setCompletedModules] = useState<string[]>([]);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
   const [showConfetti, setShowConfetti] = useState(false);
@@ -112,7 +118,8 @@ export default function TrainingPage() {
     setQuizAnswers(prev => ({ ...prev, [moduleId]: answer }));
   };
 
-  const handleCompleteModule = (moduleId: string) => {
+  const handleCompleteModule = async (moduleId: string) => {
+    if (!user) return;
     const module = modules.find(m => m.id === moduleId);
     if (!module) return;
     
@@ -128,10 +135,15 @@ export default function TrainingPage() {
     if (!completedModules.includes(moduleId)) {
       const newCompleted = [...completedModules, moduleId];
       setCompletedModules(newCompleted);
+
+      await updateUserScore(user.uid, module.points);
+      await refreshUser();
+      
       toast({
         title: 'Module Completed!',
-        description: `You've earned the "${module.badge.name}" badge and 25 coins!`,
+        description: `You've earned the "${module.badge.name}" badge and ${module.points} coins!`,
       });
+
       if (newCompleted.length === modules.length) {
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 8000);

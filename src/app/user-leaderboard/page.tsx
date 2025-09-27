@@ -17,10 +17,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { getIssues, getWorkers } from '@/lib/firebase-service';
+import { getAllUserScores } from '@/lib/firebase-service';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Trophy, Gift, DollarSign, Star, TrendingUp, Zap, CheckCircle, Coins, ShoppingCart, Utensils, Droplets, GlassWater, Cookie, Milk, Package } from 'lucide-react';
-import type { Issue } from '@/lib/types';
+import type { AppUser } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useLanguage } from '@/hooks/use-language';
@@ -33,7 +33,6 @@ type UserStats = {
   name: string;
   nameKey: string;
   avatarUrl: string;
-  reportCount: number;
   score: number;
 };
 
@@ -51,62 +50,25 @@ const storeItems = [
 
 export default function UserLeaderboardPage() {
   const [userStats, setUserStats] = useState<UserStats[]>([]);
-  const [currentUserScore, setCurrentUserScore] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
   const { user } = useAuth();
 
   useEffect(() => {
     const fetchLeaderboardData = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
+      setLoading(true);
       try {
-        const issues = await getIssues();
+        const users = await getAllUserScores();
         
-        const statsMap = new Map<string, UserStats>();
-
-        issues.forEach(issue => {
-          const { uid, name, nameKey } = issue.submittedBy;
-
-          if (!statsMap.has(uid)) {
-            statsMap.set(uid, {
-              uid,
-              name,
-              nameKey,
-              avatarUrl: `https://picsum.photos/seed/${name.split(' ')[0]}/100/100`,
-              reportCount: 0,
-              score: 0,
-            });
-          }
-
-          const userStat = statsMap.get(uid)!;
-          
-          let points = 0;
-          if (issue.status === 'Resolved') {
-            points = 10; // 10 points for a resolved issue
-          } else {
-            points = 3; // 3 points for any submitted issue
-          }
-
-          if (issue.isEmergency) {
-            points += 5; // Extra 5 points for emergency reports
-          }
-          
-          userStat.score += points;
-          userStat.reportCount += 1;
-        });
-
-        const stats = Array.from(statsMap.values());
-        stats.sort((a, b) => b.score - a.score);
+        const stats = users.map(u => ({
+            uid: u.uid,
+            name: u.name,
+            nameKey: u.nameKey,
+            avatarUrl: u.avatarUrl || `https://picsum.photos/seed/${u.name.split(' ')[0]}/100/100`,
+            score: u.score || 0,
+        })).sort((a,b) => b.score - a.score);
         
         setUserStats(stats);
-        
-        // Find and set the current user's score
-        const currentUserStat = stats.find(stat => stat.uid === user.uid);
-        setCurrentUserScore(currentUserStat?.score || 0);
 
       } catch (error) {
         console.error("Error fetching user leaderboard data:", error);
@@ -116,7 +78,7 @@ export default function UserLeaderboardPage() {
     };
     
     fetchLeaderboardData();
-  }, [user]);
+  }, []);
 
   const getRankNumber = (rank: number) => {
     if (rank === 0) return <Trophy className="h-6 w-6 text-yellow-500" />;
@@ -132,6 +94,8 @@ export default function UserLeaderboardPage() {
   if (loading) {
     return <div>{t('loading_leaderboard')}</div>;
   }
+  
+  const currentUserScore = user?.score || 0;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -153,7 +117,6 @@ export default function UserLeaderboardPage() {
                         <TableRow>
                             <TableHead className="w-[80px]">{t('rank')}</TableHead>
                             <TableHead>{t('citizen')}</TableHead>
-                            <TableHead className="text-center">{t('reports')}</TableHead>
                             <TableHead className="text-right">{t('score')}</TableHead>
                         </TableRow>
                         </TableHeader>
@@ -178,9 +141,6 @@ export default function UserLeaderboardPage() {
                                 </div>
                                 </div>
                             </TableCell>
-                            <TableCell className="text-center font-medium text-muted-foreground">
-                                    {stat.reportCount}
-                                </TableCell>
                             <TableCell className="text-right text-lg font-bold text-primary">
                                 {stat.score}
                             </TableCell>

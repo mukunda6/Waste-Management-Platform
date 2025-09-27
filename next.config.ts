@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '2mb',
       timeout: 120,
     },
+    // This is needed to allow cross-origin requests in development.
+    allowedDevOrigins: ["*"],
   },
   typescript: {
     ignoreBuildErrors: true,

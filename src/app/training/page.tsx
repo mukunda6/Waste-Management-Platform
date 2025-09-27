@@ -20,45 +20,9 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { GraduationCap, Award, Recycle, CheckCircle, Lightbulb, Star, Trash2, AppleIcon } from 'lucide-react';
+import { GraduationCap, Award, Recycle, CheckCircle, Lightbulb, Star } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Confetti from 'react-confetti';
-import { DragDropContext, Droppable, Draggable, DropResult, DroppableProps } from 'react-beautiful-dnd';
-import { cn } from '@/lib/utils';
-
-
-// Helper to reorder lists
-const reorder = (list: any[], startIndex: number, endIndex: number) => {
-  const result = Array.from(list);
-  const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
-  return result;
-};
-
-// Helper to move items between lists
-const move = (source: any[], destination: any[], droppableSource: any, droppableDestination: any) => {
-  const sourceClone = Array.from(source);
-  const destClone = Array.from(destination);
-  const [removed] = sourceClone.splice(droppableSource.index, 1);
-  destClone.splice(droppableDestination.index, 0, removed);
-  return { [droppableSource.droppableId]: sourceClone, [droppableDestination.droppableId]: destClone };
-};
-
-const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
-    const [enabled, setEnabled] = useState(false);
-    useEffect(() => {
-        const animation = requestAnimationFrame(() => setEnabled(true));
-        return () => {
-            cancelAnimationFrame(animation);
-            setEnabled(false);
-        };
-    }, []);
-    if (!enabled) {
-        return null;
-    }
-    return <Droppable {...props} isDropDisabled={props.isDropDisabled ?? false}>{children}</Droppable>;
-};
-
 
 const modules = [
   {
@@ -100,30 +64,14 @@ const modules = [
 ];
 
 
-const initialItems = [
-    { id: 'item-1', content: 'Plastic Bottle', type: 'Dry Waste', emoji: '🍾' },
-    { id: 'item-2', content: 'Apple Core', type: 'Wet Waste', emoji: '🍎' },
-    { id: 'item-3', content: 'Newspaper', type: 'Dry Waste', emoji: '📰'},
-    { id: 'item-4', content: 'Banana Peel', type: 'Wet Waste', emoji: '🍌' },
-]
-
-
 export default function TrainingPage() {
   const { toast } = useToast();
   const [completedModules, setCompletedModules] = useState<string[]>([]);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
   const [showConfetti, setShowConfetti] = useState(false);
   
-  const [gameState, setGameState] = useState({
-    items: initialItems,
-    'Dry Waste': [] as any[],
-    'Wet Waste': [] as any[],
-  });
-
   const progress = (completedModules.length / modules.length) * 100;
   const isAllCompleted = completedModules.length === modules.length;
-  
-  const isGameWon = gameState.items.length === 0 && gameState['Dry Waste'].length + gameState['Wet Waste'].length === initialItems.length;
 
   const handleQuizAnswer = (moduleId: string, answer: string) => {
     setQuizAnswers(prev => ({ ...prev, [moduleId]: answer }));
@@ -156,54 +104,6 @@ export default function TrainingPage() {
     }
   };
   
-  const onDragEnd = (result: DropResult) => {
-    const { source, destination } = result;
-
-    if (!destination) {
-      return;
-    }
-
-    const sourceId = source.droppableId;
-    const destId = destination.droppableId;
-    
-    const sourceList = gameState[sourceId as keyof typeof gameState];
-    if (!sourceList) return;
-
-    const item = sourceList[source.index];
-
-    if (sourceId === destId) {
-       if (sourceId !== 'items') return;
-       const items = reorder(gameState.items, source.index, destination.index);
-       setGameState(prev => ({ ...prev, items }));
-    } else {
-        if(destId === item.type) {
-            toast({
-                title: "Correct!",
-                description: `A ${item.content} is ${item.type}.`,
-            });
-            const result = move(gameState[sourceId as keyof typeof gameState], gameState[destId as keyof typeof gameState], source, destination);
-            setGameState(prev => ({
-                ...prev,
-                ...result
-            }));
-        } else {
-             toast({
-                variant: 'destructive',
-                title: "Incorrect!",
-                description: `A ${item.content} should go in the ${item.type} bin.`,
-            });
-        }
-    }
-  };
-  
-  const resetGame = () => {
-    setGameState({
-        items: initialItems,
-        'Dry Waste': [],
-        'Wet Waste': [],
-    });
-  }
-
   return (
     <>
       {showConfetti && <Confetti recycle={false} />}
@@ -236,117 +136,6 @@ export default function TrainingPage() {
               </div>
             )}
           </CardContent>
-        </Card>
-        
-         <Card>
-            <CardHeader>
-                <CardTitle>Segregation Challenge</CardTitle>
-                <CardDescription>Drag and drop the items into the correct waste bins to test your knowledge.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <DragDropContext onDragEnd={onDragEnd}>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <StrictModeDroppable droppableId="items">
-                            {(provided, snapshot) => (
-                                <Card
-                                    ref={provided.innerRef}
-                                    {...provided.droppableProps}
-                                    className={cn("p-4 bg-muted/50 min-h-[200px]", snapshot.isDraggingOver && "bg-muted")}
-                                >
-                                    <CardTitle className="text-lg text-center mb-4">Items to Sort</CardTitle>
-                                    <div className="space-y-2">
-                                        {gameState.items.map((item, index) => (
-                                            <Draggable key={item.id} draggableId={item.id} index={index}>
-                                                {(provided, snapshot) => (
-                                                    <div
-                                                        ref={provided.innerRef}
-                                                        {...provided.draggableProps}
-                                                        {...provided.dragHandleProps}
-                                                        className="p-3 bg-card rounded-md shadow-sm flex items-center justify-center text-3xl"
-                                                    >
-                                                       {item.emoji}
-                                                    </div>
-                                                )}
-                                            </Draggable>
-                                        ))}
-                                        {provided.placeholder}
-                                        {gameState.items.length === 0 && !isGameWon && (
-                                            <div className="text-center text-muted-foreground p-4">Drop items here</div>
-                                        )}
-                                         {isGameWon && (
-                                             <div className="text-center p-4">
-                                                <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
-                                                <p className="mt-2 font-semibold">Challenge Complete!</p>
-                                                <Button size="sm" variant="outline" onClick={resetGame} className="mt-2">Play Again</Button>
-                                             </div>
-                                         )}
-                                    </div>
-                                </Card>
-                            )}
-                        </StrictModeDroppable>
-                         <StrictModeDroppable droppableId="Dry Waste">
-                            {(provided, snapshot) => (
-                               <Card
-                                    ref={provided.innerRef}
-                                    {...provided.droppableProps}
-                                    className={cn("p-4 bg-blue-100/50 dark:bg-blue-900/20 border-blue-500 min-h-[200px]", snapshot.isDraggingOver && "bg-blue-200/50")}
-                                >
-                                     <CardTitle className="text-lg text-center mb-4 text-blue-800 dark:text-blue-300 flex items-center justify-center gap-2">
-                                        <Recycle /> Dry Waste
-                                    </CardTitle>
-                                     <div className="space-y-2">
-                                       {gameState['Dry Waste'].map((item, index) => (
-                                            <Draggable key={item.id} draggableId={item.id} index={index}>
-                                                {(provided) => (
-                                                    <div
-                                                        ref={provided.innerRef}
-                                                        {...provided.draggableProps}
-                                                        {...provided.dragHandleProps}
-                                                        className="p-3 bg-card rounded-md shadow-sm flex items-center justify-center text-3xl"
-                                                    >
-                                                        {item.emoji}
-                                                    </div>
-                                                )}
-                                            </Draggable>
-                                        ))}
-                                        {provided.placeholder}
-                                    </div>
-                                </Card>
-                            )}
-                        </StrictModeDroppable>
-                         <StrictModeDroppable droppableId="Wet Waste">
-                            {(provided, snapshot) => (
-                               <Card
-                                    ref={provided.innerRef}
-                                    {...provided.droppableProps}
-                                    className={cn("p-4 bg-green-100/50 dark:bg-green-900/20 border-green-500 min-h-[200px]", snapshot.isDraggingOver && "bg-green-200/50")}
-                                >
-                                     <CardTitle className="text-lg text-center mb-4 text-green-800 dark:text-green-300 flex items-center justify-center gap-2">
-                                        <AppleIcon /> Wet Waste
-                                    </CardTitle>
-                                     <div className="space-y-2">
-                                        {gameState['Wet Waste'].map((item, index) => (
-                                             <Draggable key={item.id} draggableId={item.id} index={index}>
-                                                {(provided) => (
-                                                    <div
-                                                        ref={provided.innerRef}
-                                                        {...provided.draggableProps}
-                                                        {...provided.dragHandleProps}
-                                                        className="p-3 bg-card rounded-md shadow-sm flex items-center justify-center text-3xl"
-                                                    >
-                                                        {item.emoji}
-                                                    </div>
-                                                )}
-                                            </Draggable>
-                                        ))}
-                                        {provided.placeholder}
-                                    </div>
-                                </Card>
-                            )}
-                        </StrictModeDroppable>
-                    </div>
-                </DragDropContext>
-            </CardContent>
         </Card>
 
         <Card>

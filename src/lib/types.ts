@@ -33,6 +33,7 @@ export interface AppUser {
     email: string;
     role: UserRole;
     avatarUrl: string;
+    mobileNumber?: string;
 }
 
 export interface Issue {

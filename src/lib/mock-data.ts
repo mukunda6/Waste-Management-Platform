@@ -50,6 +50,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     password: 'password',
     role: 'Citizen',
     avatarUrl: 'https://picsum.photos/seed/John/100/100',
+    mobileNumber: '9876543210',
   },
   {
     uid: 'citizen-user-02',
@@ -59,6 +60,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     password: 'password',
     role: 'Citizen',
     avatarUrl: 'https://picsum.photos/seed/Jane/100/100',
+    mobileNumber: '9876543211',
     },
     {
     uid: 'citizen-user-03',
@@ -68,6 +70,7 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     password: 'password',
     role: 'Citizen',
     avatarUrl: 'https://picsum.photos/seed/Peter/100/100',
+    mobileNumber: '9876543212',
     },
     {
     uid: 'citizen-user-04',

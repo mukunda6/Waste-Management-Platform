@@ -12,6 +12,7 @@ interface AuthContextType {
   user: AppUser | null;
   loading: boolean;
   login: (email: string, pass: string) => Promise<void>;
+  loginWithOtp: (mobileNumber: string, otp: string) => Promise<void>;
   logout: () => Promise<void>;
   signUp: (email: string, pass: string, name: string, role: AppUser['role'], details?: any) => Promise<void>;
 }
@@ -54,11 +55,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: foundUser.email,
         role: foundUser.role,
         avatarUrl: foundUser.avatarUrl,
+        mobileNumber: foundUser.mobileNumber,
       };
       setUser(getTranslatedUser(appUser));
       sessionStorage.setItem('user', JSON.stringify(appUser));
     } else {
       throw new Error('Invalid email or password.');
+    }
+  };
+
+  const loginWithOtp = async (mobileNumber: string, otp: string) => {
+    // This is a mock OTP verification.
+    if (otp !== '123456') {
+      throw new Error('Invalid OTP. Please try again.');
+    }
+
+    const foundUser = mockUsers.find(u => u.mobileNumber === mobileNumber);
+
+    if (foundUser) {
+      const appUser: AppUser = {
+        uid: foundUser.uid,
+        name: foundUser.name,
+        nameKey: foundUser.nameKey,
+        email: foundUser.email,
+        role: foundUser.role,
+        avatarUrl: foundUser.avatarUrl,
+        mobileNumber: foundUser.mobileNumber,
+      };
+      setUser(getTranslatedUser(appUser));
+      sessionStorage.setItem('user', JSON.stringify(appUser));
+    } else {
+      throw new Error('No user found with this mobile number.');
     }
   };
 
@@ -85,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email,
         role,
         avatarUrl: `https://picsum.photos/seed/${name.split(' ')[0]}/100/100`,
+        mobileNumber: details.mobileNumber,
     };
 
     // Add to mock users array to allow login later in the session
@@ -96,7 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, signUp }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithOtp, logout, signUp }}>
       {children}
     </AuthContext.Provider>
   );

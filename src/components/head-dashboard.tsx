@@ -13,9 +13,9 @@ import { getIssues } from '@/lib/firebase-service';
 import type { Issue } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { BarChart, LineChart, Line, Legend, Bar, XAxis, YAxis, Tooltip, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { BarChart, LineChart, Line, Legend, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
-import { Users, Map, Recycle, TrendingUp, Atom, Leaf, Fuel } from 'lucide-react';
+import { Map, Recycle, TrendingUp, Atom, Leaf, Fuel, Percent, Trash2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 
 type WasteProduct = {
@@ -88,6 +88,7 @@ const cityData = [
     { city: 'Zone C', segregationRate: 91, landfillLoad: 950 },
     { city: 'Zone D', segregationRate: 65, landfillLoad: 1800 },
 ];
+const dailyWasteData = { collected: 450, processed: 380, TPD: 450 }; // in Tons
 
 
 export function HeadDashboard() {
@@ -119,6 +120,42 @@ export function HeadDashboard() {
 
   return (
     <div className="grid gap-8">
+        <div className="grid gap-8 md:grid-cols-2">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Percent /> Segregation Compliance by Zone</CardTitle>
+                    <CardDescription>Percentage of households following segregation rules.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ChartContainer config={{}} className="h-64 w-full">
+                        <BarChart data={cityData} accessibilityLayer>
+                            <CartesianGrid vertical={false} />
+                            <XAxis dataKey="city" tickLine={false} tickMargin={10} axisLine={false} />
+                             <YAxis stroke="hsl(var(--primary))" name="Segregation" unit="%"/>
+                            <Tooltip cursor={{fill: 'hsl(var(--muted))'}} content={<ChartTooltipContent />} />
+                            <Bar dataKey="segregationRate" fill="hsl(var(--primary))" name="Segregation %" radius={4}>
+                            </Bar>
+                        </BarChart>
+                    </ChartContainer>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Trash2 /> Daily Waste Analytics</CardTitle>
+                    <CardDescription>Overview of today's total waste collected and processed.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-around items-center h-64">
+                    <div className="text-center">
+                        <p className="text-4xl font-bold">{dailyWasteData.TPD}</p>
+                        <p className="text-muted-foreground">Tons Per Day (TPD)</p>
+                    </div>
+                    <div className="text-center">
+                        <p className="text-4xl font-bold">{dailyWasteData.processed}</p>
+                        <p className="text-muted-foreground">Tons Processed</p>
+                    </div>
+                </CardContent>
+            </Card>
+       </div>
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Fuel/> Waste Stream Analytics: From Trash to Treasure</CardTitle>
@@ -179,39 +216,6 @@ export function HeadDashboard() {
                 ))}
             </CardContent>
         </Card>
-      
-      <div className="grid gap-8 lg:grid-cols-2">
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Map/> City-Wide Segregation & Landfill Load</CardTitle>
-                <CardDescription>Comparison of waste segregation rates and landfill load across different zones.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                 <ChartContainer config={{}} className="min-h-[300px] w-full">
-                     <BarChart data={cityData} accessibilityLayer>
-                        <XAxis dataKey="city" tickLine={false} tickMargin={10} axisLine={false} />
-                        <YAxis yAxisId="left" orientation="left" stroke="hsl(var(--primary))" name="Segregation" unit="%"/>
-                        <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--destructive))" name="Landfill" unit="T" />
-                        <Tooltip content={<ChartTooltipContent />} />
-                        <Legend />
-                        <Bar yAxisId="left" dataKey="segregationRate" fill="hsl(var(--primary))" name="Segregation %" radius={[4, 4, 0, 0]} />
-                        <Line yAxisId="right" dataKey="landfillLoad" type="monotone" stroke="hsl(var(--destructive))" name="Landfill Load (Tons)" strokeWidth={2} dot={{r: 4}} />
-                    </BarChart>
-                </ChartContainer>
-            </CardContent>
-        </Card>
-        
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2"><TrendingUp/> Policy & Campaign Effectiveness</CardTitle>
-                <CardDescription>Generate reports on compliance, hotspots, and campaign effectiveness.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <p className="text-muted-foreground">Report generation feature coming soon. This section will allow exporting data on segregation hotspots, overall compliance trends, and the impact of awareness campaigns to inform policy decisions.</p>
-            </CardContent>
-        </Card>
-      </div>
-
     </div>
   )
 }

@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import Link from 'next/link';
@@ -21,6 +20,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useLanguage } from '@/hooks/use-language';
 import { Progress } from './ui/progress';
 import { useToast } from '@/hooks/use-toast';
+import { WasteLogDialog } from './waste-log-dialog';
 
 const wasteCategories: { category: IssueCategory; icon: React.ReactNode; description: string; }[] = [
     { category: 'Overflowing Bins', icon: <Trash2 className="h-8 w-8" />, description: 'Public bin is full.'},
@@ -32,7 +32,6 @@ const wasteCategories: { category: IssueCategory; icon: React.ReactNode; descrip
 export function CitizenDashboard() {
   const { user } = useAuth();
   const router = useRouter();
-  const { toast } = useToast();
   const searchParams = useSearchParams();
   const [userIssues, setUserIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,13 +67,6 @@ export function CitizenDashboard() {
   const handleCategoryClick = (category: IssueCategory) => {
     router.push(`/report?category=${encodeURIComponent(category)}`);
   };
-  
-  const handleLogWaste = (wasteType: string) => {
-    toast({
-        title: `${wasteType} Logged!`,
-        description: `You've earned 5 compliance points. Keep it up!`,
-    });
-  }
 
   if (loading) {
     return <div>Loading your dashboard...</div>;
@@ -126,18 +118,9 @@ export function CitizenDashboard() {
                     <CardDescription>Log your daily segregated waste disposal to earn compliance points.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">Dry Waste</span>
-                        <Button size="sm" variant="outline" onClick={() => handleLogWaste('Dry Waste')}>Log</Button>
-                    </div>
-                     <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">Wet Waste</span>
-                        <Button size="sm" variant="outline" onClick={() => handleLogWaste('Wet Waste')}>Log</Button>
-                    </div>
-                     <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">Hazardous Waste</span>
-                        <Button size="sm" variant="destructive" onClick={() => handleLogWaste('Hazardous Waste')}>Log</Button>
-                    </div>
+                    <WasteLogDialog wasteType="Dry Waste" />
+                    <WasteLogDialog wasteType="Wet Waste" />
+                    <WasteLogDialog wasteType="Hazardous Waste" />
                 </CardContent>
             </Card>
             <Card className="flex flex-col">

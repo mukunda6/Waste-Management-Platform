@@ -69,7 +69,7 @@ Return a JSON object with your assessment.
 - duplicateIssueId: If isDuplicate is true, provide the id of the existing issue that it matches.
 
 **IMPORTANT RULES:**
-- If existingIssueData is an empty array or not provided, you MUST return { "isDuplicate": false, "confidence": 0 }.
+- If existingIssueData is an empty array ('[]') or not provided, you MUST return { "isDuplicate": false, "confidence": 0 }. Do not analyze further.
 - Base your decision on a holistic view of the image, description, title, and location. For example, two "pothole" reports at the same coordinates are very likely duplicates. A "pothole" and "broken streetlight" at the same coordinates are not.
 `,
 });
@@ -82,7 +82,7 @@ const duplicateIssueDetectionFlow = ai.defineFlow(
   },
   async input => {
     // Handle the case where there are no existing issues to compare against.
-    if (!input.existingIssueData || input.existingIssueData === '[]') {
+    if (!input.existingIssueData || input.existingIssueData.trim() === '[]') {
       return {isDuplicate: false, confidence: 0};
     }
 
@@ -91,7 +91,7 @@ const duplicateIssueDetectionFlow = ai.defineFlow(
       JSON.parse(input.existingIssueData);
     } catch (e) {
       console.error('Invalid JSON provided in existingIssueData', e);
-      // If JSON is invalid, we cannot perform a check.
+      // If JSON is invalid, we cannot perform a check. Treat as not a duplicate.
       return {isDuplicate: false, confidence: 0};
     }
 
@@ -99,5 +99,5 @@ const duplicateIssueDetectionFlow = ai.defineFlow(
     return output!;
   }
 );
-
     
+

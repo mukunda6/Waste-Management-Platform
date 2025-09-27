@@ -239,7 +239,7 @@ const gameItems = [
     { item: 'Old Smartphone', type: 'Hazardous Waste' },
     { item: 'Glass Jar', type: 'Dry Waste' },
     { item: 'Egg Shells', type: 'Wet Waste' },
-    { item: 'Expired Medicine', type 'Hazardous Waste' },
+    { item: 'Expired Medicine', type: 'Hazardous Waste' },
     { item: 'Cardboard Box', type: 'Dry Waste' },
 ];
 

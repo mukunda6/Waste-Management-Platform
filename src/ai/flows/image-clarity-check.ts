@@ -51,6 +51,7 @@ You will use this information to determine if the image is clear enough for asse
 1.  **Clarity Check**: An image is considered unclear if it is blurry, too dark, too bright, or if the main subject is obstructed or too far away. Set the isClear output field appropriately. If the image is not clear, provide a brief, user-friendly reason in the reason field (e.g., "Image is too blurry", "It's too dark to see details").
 
 2.  **Waste Classification**: Analyze the content of the image to determine the type of waste. Classify it as 'Dry Waste' (e.g., plastic, paper, metal), 'Wet Waste' (e.g., food scraps, organic material), 'Hazardous Waste' (e.g., batteries, broken glass, chemicals), or 'Uncertain' if you cannot determine. Set the wasteType field.
+    - **Rule**: If the image contains a plastic bottle, you MUST classify it as 'Dry Waste'.
 
 Image: {{media url=photoDataUri}}`,
 });

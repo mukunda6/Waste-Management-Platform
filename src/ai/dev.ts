@@ -8,5 +8,3 @@ import '@/ai/flows/image-clarity-check';
 import '@/ai/flows/duplicate-issue-detection';
 import '@/ai/flows/chatbot-flow';
 import '@/ai/flows/waste-segregation-check';
-import '@/ai/flows/waste-identification-flow';
-

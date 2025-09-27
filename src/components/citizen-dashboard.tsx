@@ -20,7 +20,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useLanguage } from '@/hooks/use-language';
 import { Progress } from './ui/progress';
 import { WasteLogDialog } from './waste-log-dialog';
-import { WasteScannerDialog } from './waste-scanner-dialog';
 
 const reportCategories: { category: IssueCategory; icon: React.ReactNode; description: string; }[] = [
     { category: 'Overflowing Bins', icon: <Trash2 className="h-8 w-8" />, description: 'Public bin is full.'},
@@ -117,7 +116,7 @@ export function CitizenDashboard() {
          </CardContent>
        </Card>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
             <Card>
                 <CardHeader>
                     <CardTitle>3-Bin Waste Tracking</CardTitle>
@@ -147,18 +146,6 @@ export function CitizenDashboard() {
                     <Button className="w-full" asChild>
                         <Link href="/training"><BookOpen/>Go to Training</Link>
                     </Button>
-                </div>
-            </Card>
-             <Card className="flex flex-col">
-                <CardHeader>
-                    <CardTitle>Waste Scanner</CardTitle>
-                    <CardDescription>Scan an item to find out how to dispose of it correctly.</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1 flex flex-col justify-center items-center">
-                     <ScanLine className="h-16 w-16 text-primary" />
-                </CardContent>
-                <div className="p-6 pt-0">
-                   <WasteScannerDialog />
                 </div>
             </Card>
         </div>

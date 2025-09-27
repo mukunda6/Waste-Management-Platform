@@ -1,7 +1,8 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import Link from 'next/link';
 import {
   Dialog,
   DialogContent,
@@ -14,7 +15,7 @@ import {
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, Upload, CheckCircle, XCircle, GraduationCap } from 'lucide-react';
 import Image from 'next/image';
 import { checkWasteSegregation } from '@/ai/flows/waste-segregation-check';
 import { cn } from '@/lib/utils';
@@ -154,11 +155,21 @@ export function WasteLogDialog({ wasteType }: WasteLogDialogProps) {
                 </div>
             )}
             {analysisResult && (
-                <div className={cn("p-3 rounded-md text-sm flex items-center gap-2", 
+                <div className={cn("p-3 rounded-md text-sm space-y-2", 
                     analysisResult.correct ? "bg-green-100 text-green-900" : "bg-red-100 text-red-900"
                 )}>
-                    {analysisResult.correct ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-                    {analysisResult.reason}
+                    <div className="flex items-center gap-2">
+                         {analysisResult.correct ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                        <p>{analysisResult.reason}</p>
+                    </div>
+                    {!analysisResult.correct && (
+                        <Button size="sm" variant="secondary" className="gap-2" asChild>
+                           <Link href="/training">
+                             <GraduationCap />
+                             Learn How
+                           </Link>
+                        </Button>
+                    )}
                 </div>
             )}
         </div>

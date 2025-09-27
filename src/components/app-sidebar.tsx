@@ -102,10 +102,10 @@ export function AppSidebar() {
             <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === '/worker-leaderboard'}
-                  tooltip={t('worker_leaderboard')}
+                  isActive={pathname === '/analytics'}
+                  tooltip={'Analytics'}
                 >
-                  <Link href="/worker-leaderboard">
+                  <Link href="/analytics">
                     <BarChart />
                     <span>{'Analytics'}</span>
                   </Link>

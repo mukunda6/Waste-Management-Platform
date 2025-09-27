@@ -13,7 +13,7 @@ import { getIssues, getWorkers } from '@/lib/firebase-service';
 import type { Issue } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { BarChart, PieChart, Bar, XAxis, YAxis, Tooltip, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { BarChart, PieChart, Bar, XAxis, YAxis, Tooltip, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { useLanguage } from '@/hooks/use-language';
 
@@ -125,9 +125,7 @@ export default function AnalyticsPage() {
                         <XAxis dataKey="city" tickLine={false} tickMargin={10} axisLine={false} />
                         <YAxis />
                         <Tooltip content={<ChartTooltipContent />} />
-                        <ResponsiveContainer width="100%" height={300}>
-                          <Legend />
-                        </ResponsiveContainer>
+                        <Legend />
                         <Bar dataKey="submitted" stackId="a" fill="var(--color-submitted)" radius={[4, 4, 0, 0]} />
                         <Bar dataKey="inProgress" stackId="a" fill="var(--color-inProgress)" />
                         <Bar dataKey="resolved" stackId="a" fill="var(--color-resolved)" radius={[4, 4, 0, 0]} />
@@ -149,9 +147,7 @@ export default function AnalyticsPage() {
                                 <Cell key={`cell-${index}`} fill={chartConfig[entry.name as keyof typeof chartConfig]?.color || '#8884d8'} />
                             ))}
                         </Pie>
-                        <ResponsiveContainer width="100%" height={300}>
-                          <Legend />
-                        </ResponsiveContainer>
+                        <Legend />
                     </PieChart>
                 </ChartContainer>
             </CardContent>

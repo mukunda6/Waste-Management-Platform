@@ -32,7 +32,7 @@ const modules = [
     title: 'Waste Segregation 101',
     description: 'Learn to separate waste into Dry, Wet, and Hazardous categories.',
     content: 'Properly separating waste at its source is the most critical step in effective waste management. This simple habit prevents recyclable materials from being contaminated and reduces the amount of waste sent to landfills.',
-    image: 'https://picsum.photos/seed/segregation/600/400',
+    image: 'https://picsum.photos/seed/waste-bins/600/400',
     imageHint: 'waste segregation bins',
     quiz: {
       question: 'Which bin should a used plastic bottle go into?',
@@ -46,7 +46,7 @@ const modules = [
     title: 'Composting at Home',
     description: 'Turn your kitchen scraps into valuable compost for your plants.',
     content: 'Composting is a natural process that recycles organic matter like leaves and food scraps into a rich soil amendment. It reduces landfill waste, enriches soil, and helps retain moisture.',
-    image: 'https://picsum.photos/seed/compost/600/400',
+    image: 'https://picsum.photos/seed/composting-bin/600/400',
     imageHint: 'compost bin',
     quiz: {
       question: 'Which of these should NOT be composted at home?',
@@ -60,7 +60,7 @@ const modules = [
     title: 'Creative Plastic Reuse',
     description: 'Discover fun DIY projects to give plastic waste a new life.',
     content: 'Before recycling, consider reusing! Many single-use plastic items can be transformed into useful objects for your home, such as planters, organizers, or even art. This reduces the demand for new plastic production.',
-    image: 'https://picsum.photos/seed/reuse/600/400',
+    image: 'https://picsum.photos/seed/bottle-planter/600/400',
     imageHint: 'plastic bottle planter',
     quiz: {
       question: 'What is a common DIY project for a plastic bottle?',

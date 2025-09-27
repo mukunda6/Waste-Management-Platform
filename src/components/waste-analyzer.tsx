@@ -66,7 +66,7 @@ export function WasteAnalyzer() {
     await new Promise(resolve => setTimeout(resolve, 1000));
     setResult({
         wasteType: 'Dry Waste',
-        reason: 'This is a mock analysis result.'
+        reason: ''
     });
     setIsLoading(false);
   };
@@ -117,7 +117,7 @@ export function WasteAnalyzer() {
                     <Badge variant="outline" className={cn("font-semibold", resultStyles[result.wasteType].badgeClass)}>
                         {resultStyles[result.wasteType].description}
                     </Badge>
-                     <p className="text-sm text-muted-foreground italic">"{result.reason}"</p>
+                     {result.reason && <p className="text-sm text-muted-foreground italic">"{result.reason}"</p>}
                 </div>
             )}
           </CardContent>

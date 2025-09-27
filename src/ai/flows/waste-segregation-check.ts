@@ -38,15 +38,11 @@ const prompt = ai.definePrompt({
   model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: CheckWasteSegregationInputSchema},
   output: {schema: CheckWasteSegregationOutputSchema},
-  prompt: `You are an AI waste classification assistant for a 3-bin smart waste tracking system. Your task is to verify if a user has correctly segregated their waste based on an uploaded image and to identify the actual waste type.
+  prompt: `Analyze the uploaded image of waste and classify it strictly into one of three categories: Dry, Wet, or Hazardous. Pay close attention to details: if the image contains food, peels, or organic matter, classify as Wet. If it contains plastics, paper, or non-biodegradable items, classify as Dry. If it contains medical, chemical, or sharp objects, classify as Hazardous. Do not accept mismatched inputs (e.g., vegetable waste cannot be Dry). Provide both the predicted category and a short explanation for the classification.
 
-**Waste Categories:**
-*   **Dry Waste**: plastics, paper, cardboard, metals, bottles, cans.
-*   **Wet Waste**: vegetables, fruits, food scraps, garden waste, organic matter.
-*   **Hazardous Waste**: broken glass, batteries, light bulbs, paint cans, e-waste, or medical waste. It should NOT contain regular dry or wet waste.
+You must determine if the waste in the image is correctly segregated based on the expected waste type.
 
-**User's Claim:**
-The user claims the waste is: **{{{expectedWasteType}}}**
+**Expected Waste Type:** {{{expectedWasteType}}}
 
 **Image to Analyze:**
 {{media url=photoDataUri}}
@@ -65,7 +61,8 @@ The user claims the waste is: **{{{expectedWasteType}}}**
 **Be Strict:**
 - If a vegetable/food item is uploaded into Dry Waste, it is INCORRECT. The detected waste type is Wet Waste.
 - If plastic is uploaded into Wet Waste, it is INCORRECT. The detected waste type is Dry Waste.
-- If broken glass is uploaded into Dry or Wet waste, it is INCORRECT. The detected waste type is Hazardous Waste.`,
+- If broken glass is uploaded into Dry or Wet waste, it is INCORRECT. The detected waste type is Hazardous Waste.
+`,
 });
 
 const checkWasteSegregationFlow = ai.defineFlow(

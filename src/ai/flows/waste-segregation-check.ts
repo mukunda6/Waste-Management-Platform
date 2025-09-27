@@ -34,7 +34,7 @@ export async function checkWasteSegregation(input: CheckWasteSegregationInput): 
 
 const prompt = ai.definePrompt({
   name: 'checkWasteSegregationPrompt',
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-pro-vision',
   input: {schema: CheckWasteSegregationInputSchema},
   output: {schema: CheckWasteSegregationOutputSchema},
   prompt: `You are an expert waste management inspector. Your task is to verify if a user has correctly segregated their waste based on an uploaded image.

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -22,73 +23,47 @@ export function CameraCapture({ onPhotoTaken }: CameraCaptureProps) {
   const cleanupStream = useCallback(() => {
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
+      setStream(null);
     }
-    if (videoRef.current) {
-        videoRef.current.srcObject = null;
-    }
-    setStream(null);
   }, [stream]);
 
-  const requestCameraPermission = useCallback(async () => {
-    // Reset state for retries
-    setHasCameraPermission(null);
+  const requestCamera = useCallback(async () => {
+    if (stream) {
+      cleanupStream();
+    }
+    
+    setCapturedImage(null);
     setError(null);
-    cleanupStream();
+    setHasCameraPermission(null);
 
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setError("Camera not supported on this browser.");
-        setHasCameraPermission(false);
-        return;
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' } 
+      });
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+      setHasCameraPermission(true);
+    } catch (err) {
+      console.error("Camera access error:", err);
+      setError("Could not access camera. Please ensure permissions are granted and it's not in use.");
+      setHasCameraPermission(false);
+      toast({
+        variant: 'destructive',
+        title: 'Camera Access Denied',
+        description: 'Please grant camera access in your browser settings.',
+      });
     }
-
-    const constraints: MediaStreamConstraints[] = [
-        { video: { facingMode: { ideal: 'environment' } } },
-        { video: true }
-    ];
-
-    let mediaStream: MediaStream | null = null;
-    for (const constraint of constraints) {
-        try {
-            mediaStream = await navigator.mediaDevices.getUserMedia(constraint);
-            if (mediaStream) break;
-        } catch (err: any) {
-            console.warn(`Failed to get camera with constraint: ${JSON.stringify(constraint)}`, err);
-        }
-    }
-
-    if (mediaStream) {
-        setStream(mediaStream);
-        setHasCameraPermission(true);
-    } else {
-        console.error('Error accessing any camera.');
-        let errorMessage = "Could not access any camera. Please ensure it's not in use by another app.";
-        if (window.location.protocol !== 'https:') {
-            errorMessage += " Your browser may require a secure connection (https) to access the camera."
-        }
-        setError(errorMessage);
-        setHasCameraPermission(false);
-        toast({
-            variant: 'destructive',
-            title: 'Camera Access Denied',
-            description: errorMessage,
-            duration: 9000,
-        });
-    }
-  }, [toast, cleanupStream]);
+  }, [stream, cleanupStream, toast]);
 
   useEffect(() => {
-    requestCameraPermission();
-
+    requestCamera();
     return () => {
       cleanupStream();
     };
-  }, [requestCameraPermission, cleanupStream]);
-
-  useEffect(() => {
-    if (stream && videoRef.current) {
-      videoRef.current.srcObject = stream;
-    }
-  }, [stream]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleCapture = () => {
     if (videoRef.current && canvasRef.current) {
@@ -107,8 +82,7 @@ export function CameraCapture({ onPhotoTaken }: CameraCaptureProps) {
   };
 
   const handleRetake = () => {
-    setCapturedImage(null);
-    requestCameraPermission(); // Re-request the camera stream
+    requestCamera();
   };
 
   const handleConfirm = () => {
@@ -175,3 +149,4 @@ export function CameraCapture({ onPhotoTaken }: CameraCaptureProps) {
     </div>
   );
 }
+

@@ -12,6 +12,7 @@ import { usePathname } from 'next/navigation'
 import { AuthProvider, useAuth } from '@/hooks/use-auth'
 import { Loader2 } from 'lucide-react';
 import { CustomerCareButton } from '@/components/customer-care-button';
+import { CallSystemButton } from '@/components/call-system-button';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { LanguageProvider } from '@/hooks/use-language';
 
@@ -66,7 +67,12 @@ function AppContent({ children }: { children: React.ReactNode }) {
          <main className="flex-1">{children}</main>
       )}
       { user && <LanguageSwitcher /> }
-      { user && user.role === 'Citizen' && <CustomerCareButton /> }
+      { user && user.role === 'Citizen' && (
+        <>
+            <CallSystemButton />
+            <CustomerCareButton />
+        </>
+      )}
     </div>
   );
 }

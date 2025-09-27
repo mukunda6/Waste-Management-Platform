@@ -13,7 +13,7 @@ import { getIssues, getWorkers } from '@/lib/firebase-service';
 import type { Issue } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { BarChart, PieChart, Bar, XAxis, YAxis, Tooltip, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { BarChart, PieChart, Bar, XAxis, YAxis, Tooltip, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { useLanguage } from '@/hooks/use-language';
 

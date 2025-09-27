@@ -20,6 +20,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useLanguage } from '@/hooks/use-language';
 import { Progress } from './ui/progress';
 import { WasteLogDialog } from './waste-log-dialog';
+import { WasteAnalyzer } from './waste-analyzer';
 
 const reportCategories: { category: IssueCategory; icon: React.ReactNode; description: string; }[] = [
     { category: 'Overflowing Bins', icon: <Trash2 className="h-8 w-8" />, description: 'Public bin is full.'},
@@ -116,7 +117,7 @@ export function CitizenDashboard() {
          </CardContent>
        </Card>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Card>
                 <CardHeader>
                     <CardTitle>3-Bin Waste Tracking</CardTitle>
@@ -126,6 +127,15 @@ export function CitizenDashboard() {
                     <WasteLogDialog wasteType="Dry Waste" />
                     <WasteLogDialog wasteType="Wet Waste" />
                     <WasteLogDialog wasteType="Hazardous Waste" />
+                </CardContent>
+            </Card>
+            <Card className="flex flex-col">
+                <CardHeader>
+                    <CardTitle>AI Waste Analyzer</CardTitle>
+                    <CardDescription>Upload a photo to classify waste type and learn how to dispose of it.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col justify-center">
+                    <WasteAnalyzer />
                 </CardContent>
             </Card>
             <Card className="flex flex-col">

@@ -19,12 +19,14 @@ import {
 } from '@/components/ui/table';
 import { getIssues, getWorkers } from '@/lib/firebase-service';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Trophy, Gift, DollarSign, Star, TrendingUp, Zap, CheckCircle, Coins } from 'lucide-react';
+import { Trophy, Gift, DollarSign, Star, TrendingUp, Zap, CheckCircle, Coins, ShoppingCart, Utensils, Droplets } from 'lucide-react';
 import type { Issue } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useLanguage } from '@/hooks/use-language';
 import { useAuth } from '@/hooks/use-auth';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
 
 type UserStats = {
   uid: string;
@@ -34,6 +36,14 @@ type UserStats = {
   reportCount: number;
   score: number;
 };
+
+const storeItems = [
+    { name: 'Rice Packet (1kg)', cost: 150, icon: <Utensils className="h-8 w-8 text-primary" />, imageHint: 'rice bag' },
+    { name: 'Cooking Oil (1L)', cost: 120, icon: <Droplets className="h-8 w-8 text-primary" />, imageHint: 'oil bottle' },
+    { name: 'Soap Bar', cost: 30, icon: <Gift className="h-8 w-8 text-primary" />, imageHint: 'soap bar' },
+    { name: 'Detergent Powder (500g)', cost: 50, icon: <Gift className="h-8 w-8 text-primary" />, imageHint: 'detergent box' },
+];
+
 
 export default function UserLeaderboardPage() {
   const [userStats, setUserStats] = useState<UserStats[]>([]);
@@ -121,55 +131,77 @@ export default function UserLeaderboardPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-3xl font-headline flex items-center gap-2">
-            <Trophy className="h-8 w-8 text-primary" />
-            {t('leaderboard_rewards')}
-          </CardTitle>
-          <CardDescription>
-            {t('user_leaderboard_desc')}
-          </CardDescription>
-            <div className="pt-4">
-                <div className="flex items-center gap-4 rounded-lg bg-muted/50 p-4">
-                    <Coins className="h-10 w-10 text-yellow-500" />
-                    <div>
-                        <h3 className="font-bold text-lg">{t('your_coins')}</h3>
-                        {currentUserScore > 0 ? (
-                            <p className="text-2xl font-bold text-primary">{currentUserScore}</p>
-                        ) : (
-                             <p className="text-sm text-muted-foreground">{t('earn_coins_prompt')}</p>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </CardHeader>
-        <CardContent>
-           <div className="grid md:grid-cols-2 gap-4 mb-6">
-             <Alert>
-                <Gift className="h-4 w-4" />
-                <AlertTitle>{t('coupons_for_reports')}</AlertTitle>
-                <AlertDescription>
-                  {t('coupons_for_reports_desc')}
-                </AlertDescription>
-              </Alert>
-              <Alert>
-                <DollarSign className="h-4 w-4" />
-                <AlertTitle>{t('weekly_cashback_rewards')}</AlertTitle>
-                <AlertDescription>
-                  {t('weekly_cashback_rewards_desc')}
-                </AlertDescription>
-              </Alert>
-           </div>
-
-            <Card className="mb-6 bg-muted/50">
+      <div className="grid gap-8 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+            <Card>
                 <CardHeader>
-                    <CardTitle className="text-xl flex items-center gap-2">
-                        <TrendingUp className="h-5 w-5"/>
-                        {t('how_it_works')}
-                    </CardTitle>
+                <CardTitle className="text-3xl font-headline flex items-center gap-2">
+                    <Trophy className="h-8 w-8 text-primary" />
+                    {t('leaderboard_rewards')}
+                </CardTitle>
+                <CardDescription>
+                    {t('user_leaderboard_desc')}
+                </CardDescription>
                 </CardHeader>
-                <CardContent className="grid sm:grid-cols-3 gap-4 text-sm">
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[80px]">{t('rank')}</TableHead>
+                            <TableHead>{t('citizen')}</TableHead>
+                            <TableHead className="text-center">{t('reports')}</TableHead>
+                            <TableHead className="text-right">{t('score')}</TableHead>
+                        </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                        {userStats.map((stat, index) => (
+                            <TableRow key={stat.uid} className={index < 3 ? 'bg-muted/50 font-bold' : ''}>
+                            <TableCell>
+                                <div className="flex items-center justify-center">
+                                    {getRankNumber(index)}
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                <div className="flex items-center gap-4">
+                                <Avatar>
+                                    <AvatarImage src={stat.avatarUrl} />
+                                    <AvatarFallback>
+                                    {t(stat.nameKey).charAt(0)}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="font-semibold">{t(stat.nameKey)}</p>
+                                </div>
+                                </div>
+                            </TableCell>
+                            <TableCell className="text-center font-medium text-muted-foreground">
+                                    {stat.reportCount}
+                                </TableCell>
+                            <TableCell className="text-right text-lg font-bold text-primary">
+                                {stat.score}
+                            </TableCell>
+                            </TableRow>
+                        ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </div>
+        <div className="space-y-4">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Coins className="text-yellow-500" /> Your Balance</CardTitle>
+                </CardHeader>
+                 <CardContent>
+                    <p className="text-4xl font-bold text-primary">{currentUserScore}</p>
+                    <p className="text-muted-foreground">coins available to redeem</p>
+                 </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><TrendingUp /> How It Works</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-4 text-sm">
                    <div className="flex items-start gap-3">
                         <Star className="h-5 w-5 mt-1 text-primary flex-shrink-0"/>
                         <div>
@@ -193,47 +225,37 @@ export default function UserLeaderboardPage() {
                    </div>
                 </CardContent>
             </Card>
-
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[80px]">{t('rank')}</TableHead>
-                <TableHead>{t('citizen')}</TableHead>
-                <TableHead className="text-center">{t('reports')}</TableHead>
-                <TableHead className="text-right">{t('score')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {userStats.map((stat, index) => (
-                <TableRow key={stat.uid} className={index < 3 ? 'bg-muted/50 font-bold' : ''}>
-                  <TableCell>
-                    <div className="flex items-center justify-center">
-                        {getRankNumber(index)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-4">
-                      <Avatar>
-                        <AvatarImage src={stat.avatarUrl} />
-                        <AvatarFallback>
-                          {t(stat.nameKey).charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-semibold">{t(stat.nameKey)}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                   <TableCell className="text-center font-medium text-muted-foreground">
-                        {stat.reportCount}
-                    </TableCell>
-                  <TableCell className="text-right text-lg font-bold text-primary">
-                    {stat.score}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        </div>
+      </div>
+      
+       <Card>
+        <CardHeader>
+            <CardTitle className="text-2xl font-headline flex items-center gap-2">
+                <ShoppingCart className="h-7 w-7 text-primary" />
+                Community Store
+            </CardTitle>
+            <CardDescription>
+                Redeem your earned coins for daily necessities and rewards.
+            </CardDescription>
+        </CardHeader>
+        <CardContent>
+           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+             {storeItems.map(item => (
+                <Card key={item.name}>
+                    <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                        <div className="p-4 bg-muted rounded-full mb-4">
+                            {item.icon}
+                        </div>
+                        <h3 className="font-semibold text-md">{item.name}</h3>
+                        <div className="flex items-center gap-1.5 font-bold text-lg my-2">
+                            <Coins className="h-5 w-5 text-yellow-500"/>
+                            {item.cost}
+                        </div>
+                         <Button className="w-full" disabled={currentUserScore < item.cost}>Redeem</Button>
+                    </CardContent>
+                </Card>
+             ))}
+           </div>
         </CardContent>
       </Card>
     </div>

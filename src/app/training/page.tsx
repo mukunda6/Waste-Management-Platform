@@ -23,7 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { GraduationCap, Award, Recycle, CheckCircle, Lightbulb, Star, Apple, GlassWater, Trash2, Bot } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Confetti from 'react-confetti';
-import { DragDropContext, Droppable, Draggable, DropResult, DroppableProps } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { cn } from '@/lib/utils';
 
 
@@ -65,22 +65,6 @@ const modules = [
     badge: { name: 'Reuse Rockstar', icon: <Lightbulb className="h-4 w-4" /> },
   },
 ];
-
-// Helper for react-beautiful-dnd in strict mode
-const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
-    const [enabled, setEnabled] = useState(false);
-    useEffect(() => {
-        const animation = requestAnimationFrame(() => setEnabled(true));
-        return () => {
-            cancelAnimationFrame(animation);
-            setEnabled(false);
-        };
-    }, []);
-    if (!enabled) {
-        return null;
-    }
-    return <Droppable {...props}>{children}</Droppable>;
-};
 
 
 const initialItems = {
@@ -331,7 +315,7 @@ export default function TrainingPage() {
                         {Object.values(columns).map(column => (
                             <div key={column.id} className="flex flex-col">
                                 <h3 className="font-bold text-lg mb-2 text-center">{column.title}</h3>
-                                <StrictModeDroppable droppableId={column.id}>
+                                <Droppable droppableId={column.id}>
                                     {(provided, snapshot) => (
                                         <div
                                             ref={provided.innerRef}
@@ -365,7 +349,7 @@ export default function TrainingPage() {
                                             {provided.placeholder}
                                         </div>
                                     )}
-                                </StrictModeDroppable>
+                                </Droppable>
                             </div>
                         ))}
                     </div>

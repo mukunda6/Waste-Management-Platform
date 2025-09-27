@@ -65,7 +65,17 @@ const checkWasteSegregationFlow = ai.defineFlow(
     outputSchema: CheckWasteSegregationOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    try {
+      const {output} = await prompt(input);
+      return output!;
+    } catch (error) {
+      console.error('AI waste segregation check failed:', error);
+      // If the AI service fails, default to a "correct" response to avoid blocking the user.
+      // Provide a reason indicating the AI check was skipped.
+      return {
+        isCorrectlySegregated: true,
+        reason: 'AI verification is temporarily unavailable. Points awarded for your submission.',
+      };
+    }
   }
 );

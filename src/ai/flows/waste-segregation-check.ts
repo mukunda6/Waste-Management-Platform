@@ -58,9 +58,9 @@ You will be given a photo and the type of waste the user claims it is.
     *   If incorrect: "Incorrect. This appears to be {detectedWasteType}, not {expectedWasteType}." or "Incorrect. Found {contaminant} in the {expectedWasteType} bin." Be specific.
 
 **Definitions for Analysis:**
-*   **"Wet Waste"**: Compostable materials like fruit/vegetable peels, leftover food, coffee grounds, garden waste.
-*   **"Dry Waste"**: Recyclable materials like plastic bottles, containers, paper, cardboard, metal cans.
-*   **"Hazardous Waste"**: Items like batteries, light bulbs, paint cans, or e-waste. It should NOT contain regular dry or wet waste.`,
+*   **"Wet Waste"**: Compostable materials like vegetable waste, fruit peels, leftover food, coffee grounds, garden waste.
+*   **"Dry Waste"**: Recyclable materials like plastic bottles, plastic containers, paper, cardboard, metal cans.
+*   **"Hazardous Waste"**: Items like batteries, light bulbs, paint cans, e-waste, or broken glass. It should NOT contain regular dry or wet waste.`,
 });
 
 const checkWasteSegregationFlow = ai.defineFlow(

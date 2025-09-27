@@ -45,7 +45,7 @@ const chartConfig = {
   },
 };
 
-export default function WorkerLeaderboardPage() {
+export default function AnalyticsPage() {
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();

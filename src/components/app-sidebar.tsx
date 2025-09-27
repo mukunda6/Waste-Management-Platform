@@ -24,6 +24,7 @@ import {
   Shield,
   Bot,
   AlertTriangle,
+  BarChart,
 } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -88,12 +89,12 @@ export function AppSidebar() {
             <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === '/worker-leaderboard'}
-                  tooltip={t('worker_leaderboard')}
+                  isActive={pathname === '/analytics'}
+                  tooltip={'Analytics'}
                 >
-                  <Link href="/worker-leaderboard">
-                    <Shield />
-                    <span>{t('worker_leaderboard')}</span>
+                  <Link href="/analytics">
+                    <BarChart />
+                    <span>{'Analytics'}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

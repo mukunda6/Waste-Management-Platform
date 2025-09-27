@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 interface CameraCaptureProps {
   onPhotoTaken: (file: File) => void;
+  onClose?: () => void;
 }
 
 export function CameraCapture({ onPhotoTaken }: CameraCaptureProps) {
@@ -47,12 +48,20 @@ export function CameraCapture({ onPhotoTaken }: CameraCaptureProps) {
       setHasCameraPermission(true);
     } catch (err) {
       console.error("Camera access error:", err);
-      setError("Could not access camera. Please ensure permissions are granted and it's not in use.");
+      let errorMessage = "Could not access camera. Please ensure permissions are granted and it's not in use.";
+      if (err instanceof Error) {
+          if (err.name === 'NotAllowedError') {
+              errorMessage = 'Camera access was denied. Please grant camera access in your browser settings and refresh the page.';
+          } else if (err.name === 'NotFoundError') {
+              errorMessage = 'No camera was found on your device.';
+          }
+      }
+      setError(errorMessage);
       setHasCameraPermission(false);
       toast({
         variant: 'destructive',
-        title: 'Camera Access Denied',
-        description: 'Please grant camera access in your browser settings.',
+        title: 'Camera Access Error',
+        description: errorMessage,
       });
     }
   }, [stream, cleanupStream, toast]);
@@ -62,8 +71,7 @@ export function CameraCapture({ onPhotoTaken }: CameraCaptureProps) {
     return () => {
       cleanupStream();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // Only run once on mount
 
   const handleCapture = () => {
     if (videoRef.current && canvasRef.current) {
@@ -112,6 +120,7 @@ export function CameraCapture({ onPhotoTaken }: CameraCaptureProps) {
         <AlertTitle>Camera Access Required</AlertTitle>
         <AlertDescription>
           {error || "We couldn't access your device's camera. Please grant camera permissions in your browser's settings and refresh the page."}
+           <Button onClick={requestCamera} variant="link" className="p-0 h-auto mt-2">Try Again</Button>
         </AlertDescription>
       </Alert>
     );
@@ -149,4 +158,3 @@ export function CameraCapture({ onPhotoTaken }: CameraCaptureProps) {
     </div>
   );
 }
-

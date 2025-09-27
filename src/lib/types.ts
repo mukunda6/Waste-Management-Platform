@@ -24,7 +24,7 @@ export type EmergencyCategory =
   | 'Chemical Leak'
   | 'Major Garbage Fire';
 
-export type UserRole = 'Citizen' | 'Admin' | 'Head' | 'Worker';
+export type UserRole = 'Citizen' | 'Admin' | 'Head' | 'Worker' | 'Buyer';
 
 export interface AppUser {
     uid: string;

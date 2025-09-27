@@ -36,6 +36,10 @@ const baseSchema = z.object({
 });
 
 const citizenSchema = baseSchema.omit({ terms: true }); // No terms for citizen simple form
+const buyerSchema = baseSchema.omit({ terms: true }).extend({
+    companyName: z.string().min(2, 'Company name is required.')
+});
+
 
 const adminSchema = baseSchema.extend({
   mobileNumber: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit mobile number.'),
@@ -58,12 +62,14 @@ const formSchemas = {
   Citizen: citizenSchema,
   Admin: adminSchema,
   Head: headSchema,
+  Buyer: buyerSchema,
 };
 
 type FormSchemaForRole<T extends UserRole> = 
     T extends 'Citizen' ? typeof citizenSchema :
     T extends 'Admin' ? typeof adminSchema :
     T extends 'Head' ? typeof headSchema :
+    T extends 'Buyer' ? typeof buyerSchema :
     never;
 
 export function SignupForm({ role }: { role: UserRole }) {
@@ -92,6 +98,12 @@ export function SignupForm({ role }: { role: UserRole }) {
         email: '',
         password: '',
         confirmPassword: '',
+      } : role === 'Buyer' ? {
+        fullName: '',
+        companyName: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
       } : {
         fullName: '',
         email: '',
@@ -115,7 +127,8 @@ export function SignupForm({ role }: { role: UserRole }) {
   const onSubmit = async (values: z.infer<typeof currentSchema>) => {
     setIsLoading(true);
     try {
-        await signUp(values.email, values.password, values.fullName, role, values);
+        const displayName = role === 'Buyer' && 'companyName' in values ? values.companyName : values.fullName;
+        await signUp(values.email, values.password, displayName, role, values);
         toast({
             title: 'Account Created!',
             description: "You have been successfully signed up. Redirecting to dashboard...",
@@ -137,15 +150,26 @@ export function SignupForm({ role }: { role: UserRole }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
-        {/* Common Fields */}
-        <div className="grid md:grid-cols-2 gap-4">
+        
+        {role === 'Buyer' ? (
+             <div className="grid md:grid-cols-2 gap-4">
+                <FormField control={form.control} name="companyName" render={({ field }) => (
+                    <FormItem><FormLabel>Company Name</FormLabel><FormControl><Input placeholder="Your Company Inc." {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+                <FormField control={form.control} name="fullName" render={({ field }) => (
+                    <FormItem><FormLabel>Contact Person Name</FormLabel><FormControl><Input placeholder="Enter your full name" {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+            </div>
+        ) : (
             <FormField control={form.control} name="fullName" render={({ field }) => (
                 <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter your full name" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
-            <FormField control={form.control} name="email" render={({ field }) => (
-                <FormItem><FormLabel>Official Email</FormLabel><FormControl><Input placeholder="Enter official email" {...field} type="email" /></FormControl><FormMessage /></FormItem>
-            )}/>
-        </div>
+        )}
+
+        <FormField control={form.control} name="email" render={({ field }) => (
+            <FormItem><FormLabel>Official Email</FormLabel><FormControl><Input placeholder="Enter official email" {...field} type="email" /></FormControl><FormMessage /></FormItem>
+        )}/>
+
         <div className="grid md:grid-cols-2 gap-4">
             <FormField control={form.control} name="password" render={({ field }) => (
                 <FormItem><FormLabel>Password</FormLabel><FormControl><Input placeholder="Create a strong password" {...field} type="password" /></FormControl><FormMessage /></FormItem>
@@ -227,7 +251,7 @@ export function SignupForm({ role }: { role: UserRole }) {
           </>
         )}
         
-        {(role === 'Admin' || role === 'Head') && (
+        {(role === 'Admin' || role === 'Head' || role === 'Buyer') && (
              <FormField control={form.control} name="terms" render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
                     <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>

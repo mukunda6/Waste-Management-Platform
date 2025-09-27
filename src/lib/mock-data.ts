@@ -43,6 +43,15 @@ export const mockUsers: (AppUser & { password?: string })[] = [
     avatarUrl: 'https://picsum.photos/seed/worker2/100/100',
   },
   {
+    uid: 'buyer-user-01',
+    name: 'Recycle Corp.',
+    nameKey: 'recycle_corp',
+    email: 'buyer@test.com',
+    password: 'password',
+    role: 'Buyer',
+    avatarUrl: 'https://picsum.photos/seed/buyer/100/100',
+  },
+  {
     uid: 'citizen-user-01',
     name: 'John Citizen',
     nameKey: 'john_citizen',

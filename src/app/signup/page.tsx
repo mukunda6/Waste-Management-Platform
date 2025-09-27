@@ -29,19 +29,25 @@ export default function SignupPage() {
           <CardDescription>
             {role === 'Citizen' 
                 ? 'Sign up to report issues and help your community.'
+                : role === 'Buyer'
+                ? 'Sign up to purchase recycled materials and other waste outputs.'
                 : 'Create a new staff account for your designated role.'
             }
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="Citizen" className="w-full" onValueChange={(value) => setRole(value as UserRole)}>
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="Citizen">Citizen</TabsTrigger>
+              <TabsTrigger value="Buyer">Buyer</TabsTrigger>
               <TabsTrigger value="Admin">Admin</TabsTrigger>
               <TabsTrigger value="Head">Head</TabsTrigger>
             </TabsList>
             <TabsContent value="Citizen">
               <SignupForm role="Citizen" />
+            </TabsContent>
+             <TabsContent value="Buyer">
+              <SignupForm role="Buyer" />
             </TabsContent>
             <TabsContent value="Admin">
                <SignupForm role="Admin" />

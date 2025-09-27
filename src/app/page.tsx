@@ -45,7 +45,7 @@ const otpSchema = z.object({
 });
 
 
-type Role = 'Citizen' | 'Admin' | 'Head';
+type Role = 'Citizen' | 'Admin' | 'Head' | 'Buyer';
 
 const roleCredentials: Record<Role, { email: string; description: string }> = {
     Citizen: {
@@ -59,6 +59,10 @@ const roleCredentials: Record<Role, { email: string; description: string }> = {
     Head: {
         email: 'head@test.com',
         description: 'Oversee city-wide waste analytics and policy effectiveness.'
+    },
+    Buyer: {
+        email: 'buyer@test.com',
+        description: 'Purchase recycled materials and other waste-derived products.'
     }
 }
 
@@ -154,24 +158,13 @@ export default function LoginPage() {
   }
 
   // Show a full-screen loader while we're determining the auth state.
-  if (authLoading) {
+  if (authLoading || (!authLoading && user)) {
      return (
         <div className="flex justify-center items-center h-screen">
             <Loader2 className="h-8 w-8 animate-spin" />
         </div>
     )
   }
-  
-  // If the user is already logged in, the useEffect will handle redirection.
-  // We can render null or a minimal loader here to avoid flashing the login page.
-  if (user) {
-    return (
-       <div className="flex justify-center items-center h-screen">
-           <Loader2 className="h-8 w-8 animate-spin" />
-       </div>
-   );
-  }
-
 
   const EmailLoginForm = ({ role }: { role: Role }) => (
     <Form {...emailForm}>
@@ -322,8 +315,9 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="Citizen" className="w-full" onValueChange={(value) => handleTabChange(value as Role)}>
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="Citizen">Citizen</TabsTrigger>
+              <TabsTrigger value="Buyer">Buyer</TabsTrigger>
               <TabsTrigger value="Admin">Admin</TabsTrigger>
               <TabsTrigger value="Head">Head</TabsTrigger>
             </TabsList>
@@ -332,6 +326,12 @@ export default function LoginPage() {
                  Sign in with your mobile number to report issues, track progress, and earn rewards.
                 </p>
                 <CitizenLoginForm />
+            </TabsContent>
+            <TabsContent value="Buyer">
+               <p className="text-sm text-muted-foreground text-center h-10 flex items-center justify-center px-4">
+                 {roleCredentials.Buyer.description}
+                </p>
+              <EmailLoginForm role="Buyer" />
             </TabsContent>
             <TabsContent value="Admin">
                <p className="text-sm text-muted-foreground text-center h-10 flex items-center justify-center px-4">

@@ -8,6 +8,7 @@ import { CitizenDashboard } from '@/components/citizen-dashboard'
 import { AdminDashboard } from '@/components/admin-dashboard'
 import { HeadDashboard } from '@/components/head-dashboard'
 import { WorkerDashboard } from '@/components/worker-dashboard';
+import { BuyerDashboard } from '@/components/buyer-dashboard';
 import { Suspense, useEffect } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { useRouter } from 'next/navigation'
@@ -43,6 +44,8 @@ function DashboardContent() {
         return <HeadDashboard />
       case 'Worker':
         return <WorkerDashboard user={user}/>
+      case 'Buyer':
+        return <BuyerDashboard />
       default:
         // Fallback to citizen dashboard if role is unknown
         return <CitizenDashboard />
@@ -59,6 +62,8 @@ function DashboardContent() {
         return 'City-wide analytics on waste management and policy effectiveness.'
       case 'Worker':
         return 'View and manage your assigned waste collection tasks.'
+      case 'Buyer':
+        return 'Browse and purchase available waste-derived resources.'
       default:
         return 'Track your reports and see community issues.'
     }
@@ -74,6 +79,8 @@ function DashboardContent() {
         return 'City-Wide Waste Analytics';
        case 'Worker':
         return 'Waste Worker Dashboard';
+      case 'Buyer':
+        return 'Waste Resource Marketplace';
       default:
         return 'Dashboard';
     }

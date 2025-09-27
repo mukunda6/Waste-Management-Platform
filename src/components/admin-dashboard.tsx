@@ -35,7 +35,7 @@ import { Button } from './ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/use-language';
-import { Bar, BarChart, CartesianGrid, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from './ui/chart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 

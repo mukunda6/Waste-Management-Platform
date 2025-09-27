@@ -102,6 +102,7 @@ export function ReportIssueForm({
   const [imageClarity, setImageClarity] = useState<{
     status: 'idle' | 'checking' | 'clear' | 'unclear';
     reason?: string;
+    wasteType?: 'Dry Waste' | 'Wet Waste' | 'Uncertain';
   }>({ status: 'idle' });
 
   const form = useForm<FormData>({
@@ -131,9 +132,9 @@ export function ReportIssueForm({
       try {
         const clarityResult = await checkImageClarity({ photoDataUri: dataUri });
         if (clarityResult.isClear) {
-          setImageClarity({ status: 'clear' });
+          setImageClarity({ status: 'clear', wasteType: clarityResult.wasteType });
         } else {
-          setImageClarity({ status: 'unclear', reason: clarityResult.reason });
+          setImageClarity({ status: 'unclear', reason: clarityResult.reason, wasteType: clarityResult.wasteType });
           form.setError('photoDataUri', {
             type: 'manual',
             message:
@@ -314,7 +315,7 @@ export function ReportIssueForm({
                 {imageClarity.status !== 'idle' && (
                     <FormDescription className="flex items-center gap-2">
                         {imageClarity.status === 'checking' && <> <Loader2 className="h-4 w-4 animate-spin"/> Checking image clarity & type...</>}
-                        {imageClarity.status === 'clear' && <> <CheckCircle className="h-4 w-4 text-green-500"/> Image is clear. AI classified as: Dry Waste</>}
+                        {imageClarity.status === 'clear' && <> <CheckCircle className="h-4 w-4 text-green-500"/> Image is clear. AI classified as: {imageClarity.wasteType}</>}
                         {imageClarity.status === 'unclear' && <> <AlertTriangle className="h-4 w-4 text-destructive"/> Image may be unclear. Reason: {imageClarity.reason}</>}
                     </FormDescription>
                 )}

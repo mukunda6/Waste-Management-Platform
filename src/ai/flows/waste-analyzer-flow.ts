@@ -42,6 +42,14 @@ const wasteAnalyzerPrompt = ai.definePrompt({
 - Provide a brief, one-sentence reason for your classification.
 
 Image: {{media url=photoDataUri}}`,
+  config: {
+    safetySettings: [
+        {
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            threshold: 'BLOCK_NONE',
+        }
+    ]
+  }
 });
 
 const wasteAnalyzerFlow = ai.defineFlow(

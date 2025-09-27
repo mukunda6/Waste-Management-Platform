@@ -287,18 +287,9 @@ export default function LoginPage() {
   );
 
   const CitizenLoginForm = () => (
-     <Tabs defaultValue="email" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="email">Sign in with Email</TabsTrigger>
-            <TabsTrigger value="mobile">Sign in with Mobile</TabsTrigger>
-        </TabsList>
-        <TabsContent value="email" className="pt-4">
-            <EmailLoginForm role="Citizen" />
-        </TabsContent>
-        <TabsContent value="mobile" className="pt-4">
-            <MobileLoginForm />
-        </TabsContent>
-     </Tabs>
+     <div className="pt-4">
+        <MobileLoginForm />
+     </div>
   );
 
   return (
@@ -324,7 +315,7 @@ export default function LoginPage() {
             </TabsList>
             <TabsContent value="Citizen" className="pt-4">
                <p className="text-sm text-muted-foreground text-center h-10 flex items-center justify-center px-4">
-                 {roleCredentials.Citizen.description}
+                 Sign in with your mobile number to report issues, track progress, and earn rewards.
                 </p>
                 <CitizenLoginForm />
             </TabsContent>

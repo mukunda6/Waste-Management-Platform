@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -21,22 +21,41 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { GraduationCap, Award, Recycle, CheckCircle, Lightbulb, Star } from 'lucide-react';
+import { GraduationCap, Award, Recycle, CheckCircle, Lightbulb, Star, Info, Package, Apple, Newspaper } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import Confetti from 'react-confetti';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+
+// Helper to reorder lists
+const reorder = (list, startIndex, endIndex) => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+  return result;
+};
+
+// Helper to move items between lists
+const move = (source, destination, droppableSource, droppableDestination) => {
+  const sourceClone = Array.from(source);
+  const destClone = Array.from(destination);
+  const [removed] = sourceClone.splice(droppableSource.index, 1);
+  destClone.splice(droppableDestination.index, 0, removed);
+  return { [droppableSource.droppableId]: sourceClone, [droppableDestination.droppableId]: destClone };
+};
+
+const initialWasteItems = [
+    { id: 'item-1', content: 'Plastic Bottle', type: 'Dry Waste', icon: <Package/> },
+    { id: 'item-2', content: 'Apple Core', type: 'Wet Waste', icon: <Apple/> },
+    { id: 'item-3', content: 'Newspaper', type: 'Dry Waste', icon: <Newspaper/> },
+];
 
 const modules = [
   {
     id: 'segregation',
-    title: 'Waste Segregation 101',
+    title: 'Game: Waste Segregation 101',
     description: 'Learn to separate waste into Dry, Wet, and Hazardous categories.',
     content: 'Properly separating waste at its source is the most critical step in effective waste management. This simple habit prevents recyclable materials from being contaminated and reduces the amount of waste sent to landfills.',
-    quiz: {
-      question: 'Which bin should a used plastic bottle go into?',
-      options: ['Wet Waste', 'Dry Waste', 'Hazardous Waste'],
-      answer: 'Dry Waste',
-    },
     badge: { name: 'Segregation Star', icon: <Star className="h-4 w-4" /> },
   },
   {
@@ -65,11 +84,143 @@ const modules = [
   },
 ];
 
+const WasteSortingGame = ({ onGameComplete }) => {
+    const [state, setState] = useState({
+        items: initialWasteItems,
+        'Dry Waste': [],
+        'Wet Waste': [],
+    });
+    const [feedback, setFeedback] = useState({});
+
+    const onDragEnd = result => {
+        const { source, destination } = result;
+
+        if (!destination) return;
+        
+        const sourceId = source.droppableId;
+        const destId = destination.droppableId;
+
+        const item = state[sourceId][source.index];
+
+        if (sourceId === destId) {
+             const items = reorder(state[sourceId], source.index, destination.index);
+             setState(prevState => ({ ...prevState, [sourceId]: items }));
+        } else {
+             const result = move(state[sourceId], state[destId], source, destination);
+             setState(prevState => ({ ...prevState, ...result }));
+
+             if (item.type === destId) {
+                setFeedback(prev => ({...prev, [item.id]: 'correct'}));
+             } else {
+                setFeedback(prev => ({...prev, [item.id]: 'incorrect'}));
+             }
+        }
+    };
+    
+    useEffect(() => {
+        if (state.items.length === 0) {
+            const allCorrect = Object.values(feedback).every(f => f === 'correct');
+            if (allCorrect) {
+                onGameComplete();
+            }
+        }
+    }, [state, feedback, onGameComplete]);
+
+    const getList = (id) => state[id];
+
+    return (
+        <DragDropContext onDragEnd={onDragEnd}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Droppable droppableId="items">
+                    {(provided, snapshot) => (
+                        <div ref={provided.innerRef} {...provided.droppableProps} className="p-4 bg-muted/50 rounded-lg min-h-[200px]">
+                            <h4 className="font-semibold mb-3 text-center">Waste Items</h4>
+                            {getList('items').map((item, index) => (
+                                <Draggable key={item.id} draggableId={item.id} index={index}>
+                                    {(provided, snapshot) => (
+                                        <div
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            {...provided.dragHandleProps}
+                                            className="p-2 mb-2 bg-white rounded-md shadow flex items-center gap-2"
+                                        >
+                                            {item.icon} {item.content}
+                                        </div>
+                                    )}
+                                </Draggable>
+                            ))}
+                            {provided.placeholder}
+                        </div>
+                    )}
+                </Droppable>
+
+                <Droppable droppableId="Dry Waste">
+                    {(provided, snapshot) => (
+                        <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className={cn("p-4 rounded-lg min-h-[200px] transition-colors", snapshot.isDraggingOver ? 'bg-blue-100' : 'bg-blue-50')}
+                        >
+                            <h4 className="font-semibold mb-3 text-center text-blue-800">Dry Waste Bin</h4>
+                            {getList('Dry Waste').map((item, index) => (
+                               <div
+                                    className={cn("p-2 mb-2 bg-white rounded-md shadow flex items-center gap-2", 
+                                        feedback[item.id] === 'correct' && 'border-2 border-green-500',
+                                        feedback[item.id] === 'incorrect' && 'border-2 border-red-500'
+                                    )}
+                                >
+                                    {item.icon} {item.content}
+                                </div>
+                            ))}
+                            {provided.placeholder}
+                        </div>
+                    )}
+                </Droppable>
+                
+                <Droppable droppableId="Wet Waste">
+                    {(provided, snapshot) => (
+                        <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className={cn("p-4 rounded-lg min-h-[200px] transition-colors", snapshot.isDraggingOver ? 'bg-green-100' : 'bg-green-50')}
+                        >
+                            <h4 className="font-semibold mb-3 text-center text-green-800">Wet Waste Bin</h4>
+                             {getList('Wet Waste').map((item, index) => (
+                                <div
+                                    className={cn("p-2 mb-2 bg-white rounded-md shadow flex items-center gap-2", 
+                                        feedback[item.id] === 'correct' && 'border-2 border-green-500',
+                                        feedback[item.id] === 'incorrect' && 'border-2 border-red-500'
+                                    )}
+                                >
+                                    {item.icon} {item.content}
+                                </div>
+                            ))}
+                            {provided.placeholder}
+                        </div>
+                    )}
+                </Droppable>
+            </div>
+             {state.items.length === 0 && !Object.values(feedback).every(f => f === 'correct') && (
+                <p className="text-red-600 text-center mt-2 font-semibold">
+                    Some items are in the wrong bin. Please correct them to complete the module.
+                </p>
+            )}
+        </DragDropContext>
+    );
+};
+
+
 export default function TrainingPage() {
   const { toast } = useToast();
   const [completedModules, setCompletedModules] = useState<string[]>([]);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
   const [showConfetti, setShowConfetti] = useState(false);
+  
+  // This state is to ensure drag and drop is only enabled on the client
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const progress = (completedModules.length / modules.length) * 100;
   const isAllCompleted = completedModules.length === modules.length;
@@ -81,8 +232,8 @@ export default function TrainingPage() {
   const handleCompleteModule = (moduleId: string) => {
     const module = modules.find(m => m.id === moduleId);
     if (!module) return;
-
-    if (quizAnswers[moduleId] !== module.quiz.answer) {
+    
+    if (module.quiz && quizAnswers[moduleId] !== module.quiz.answer) {
       toast({
         variant: 'destructive',
         title: 'Incorrect Answer',
@@ -162,18 +313,28 @@ export default function TrainingPage() {
                     </div>
                     
                     <div className="p-4 bg-muted/50 rounded-lg">
-                      <h4 className="font-semibold mb-3">Mini Quiz</h4>
-                      <p className="mb-2">{module.quiz.question}</p>
-                      <RadioGroup onValueChange={(value) => handleQuizAnswer(module.id, value)} disabled={completedModules.includes(module.id)}>
-                        {module.quiz.options.map(option => (
-                          <div key={option} className="flex items-center space-x-2">
-                            <RadioGroupItem value={option} id={`${module.id}-${option}`} />
-                            <Label htmlFor={`${module.id}-${option}`}>{option}</Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
+                       <h4 className="font-semibold mb-3 flex items-center gap-2">
+                        <Info className="h-5 w-5" />
+                        {module.quiz ? 'Mini Quiz' : 'Drag each item to the correct bin below.'}
+                      </h4>
+                      {module.id === 'segregation' && isClient && (
+                         <WasteSortingGame onGameComplete={() => handleCompleteModule('segregation')} />
+                      )}
+                      {module.quiz && (
+                        <>
+                            <p className="mb-2">{module.quiz.question}</p>
+                            <RadioGroup onValueChange={(value) => handleQuizAnswer(module.id, value)} disabled={completedModules.includes(module.id)}>
+                                {module.quiz.options.map(option => (
+                                <div key={option} className="flex items-center space-x-2">
+                                    <RadioGroupItem value={option} id={`${module.id}-${option}`} />
+                                    <Label htmlFor={`${module.id}-${option}`}>{option}</Label>
+                                </div>
+                                ))}
+                            </RadioGroup>
+                        </>
+                      )}
                     </div>
-
+                    
                     {completedModules.includes(module.id) ? (
                         <div className="flex items-center justify-between p-3 bg-green-100 dark:bg-green-900/20 rounded-lg">
                             <p className="text-sm font-medium text-green-700 dark:text-green-300">Module Completed!</p>
@@ -183,9 +344,11 @@ export default function TrainingPage() {
                             </Badge>
                         </div>
                     ) : (
-                        <Button onClick={() => handleCompleteModule(module.id)} disabled={!quizAnswers[module.id]}>
-                            Complete Module & Earn Badge
-                        </Button>
+                        module.quiz && (
+                            <Button onClick={() => handleCompleteModule(module.id)} disabled={!quizAnswers[module.id]}>
+                                Complete Module & Earn Badge
+                            </Button>
+                        )
                     )}
                   </AccordionContent>
                 </AccordionItem>
@@ -197,5 +360,3 @@ export default function TrainingPage() {
     </>
   );
 }
-
-    

@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import {
   Dialog,
   DialogContent,
@@ -15,9 +14,8 @@ import {
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload, CheckCircle, XCircle, GraduationCap } from 'lucide-react';
+import { Loader2, Upload, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
-import { checkWasteSegregation } from '@/ai/flows/waste-segregation-check';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { updateUserScore } from '@/lib/firebase-service';
@@ -29,64 +27,36 @@ interface WasteLogDialogProps {
 export function WasteLogDialog({ wasteType }: WasteLogDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [analysisResult, setAnalysisResult] = useState<{
-    correct: boolean;
-    reason: string;
-    detectedType?: string;
-  } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user, refreshUser } = useAuth();
+  const [submitted, setSubmitted] = useState(false);
+
 
   const handleVerify = async (file: File) => {
     if (!user) return;
     setIsLoading(true);
-    setAnalysisResult(null);
+    
+    // Simulate a short delay for UX
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     try {
-      const reader = new FileReader();
-      reader.onload = async e => {
-        const dataUri = e.target?.result as string;
-        const result = await checkWasteSegregation({
-          photoDataUri: dataUri,
-          expectedWasteType: wasteType,
+        await updateUserScore(user.uid, 10);
+        await refreshUser();
+        toast({
+            title: 'Log Submitted!',
+            description: `You've earned 10 compliance points for logging your ${wasteType}.`,
         });
-
-        setAnalysisResult({
-          correct: result.isCorrectlySegregated,
-          reason: result.reason,
-          detectedType: result.detectedWasteType,
-        });
-
-        if (result.isCorrectlySegregated) {
-          await updateUserScore(user.uid, 10);
-          await refreshUser();
-          toast({
-            title: 'Verification Successful!',
-            description: `You've earned 10 compliance points for correct segregation.`,
-          });
-        } else {
-          let description = result.reason;
-          if (result.detectedWasteType && result.detectedWasteType !== wasteType && result.detectedWasteType !== 'Mixed Waste' && result.detectedWasteType !== 'Uncertain') {
-            description = `This looks like ${result.detectedWasteType}. Please use the 'Log ${result.detectedWasteType}' option.`;
-          }
-          toast({
-            variant: 'destructive',
-            title: 'Segregation Incorrect',
-            description: description,
-          });
-        }
+        setSubmitted(true);
         setIsLoading(false);
-      };
-      reader.readAsDataURL(file);
     } catch (error) {
-      console.error('Waste verification failed:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Verification Failed',
-        description: 'Could not analyze the image. Please try again.',
-      });
-      setIsLoading(false);
+        console.error('Waste logging failed:', error);
+        toast({
+            variant: 'destructive',
+            title: 'Submission Failed',
+            description: 'Could not save your log. Please try again.',
+        });
+        setIsLoading(false);
     }
   };
 
@@ -94,17 +64,15 @@ export function WasteLogDialog({ wasteType }: WasteLogDialogProps) {
     const file = event.target.files?.[0];
     if (file) {
       setImagePreview(URL.createObjectURL(file));
-      setAnalysisResult(null); // Reset previous result
       handleVerify(file); // Automatically start verification
     }
   };
 
   const resetState = () => {
-    // Keep dialog open on close to prevent flicker
     setImagePreview(null);
-    setAnalysisResult(null);
     setIsLoading(false);
     setIsOpen(false);
+    setSubmitted(false);
   };
   
   const wasteTypeClasses = {
@@ -163,40 +131,21 @@ export function WasteLogDialog({ wasteType }: WasteLogDialogProps) {
             {isLoading && (
                 <div className="p-3 rounded-md text-sm flex items-center justify-center gap-2 bg-muted">
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing Image...
+                    Submitting Log...
                 </div>
             )}
-            {analysisResult && (
-                <div className={cn("p-3 rounded-md text-sm space-y-2", 
-                    analysisResult.correct ? "bg-green-100 text-green-900" : "bg-red-100 text-red-900"
-                )}>
+            {submitted && (
+                <div className={cn("p-3 rounded-md text-sm space-y-2 bg-green-100 text-green-900")}>
                     <div className="flex items-center gap-2">
-                         {analysisResult.correct ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-                         
-                          <p>
-                            {analysisResult.correct 
-                              ? analysisResult.reason
-                              : (analysisResult.detectedType && analysisResult.detectedType !== wasteType && analysisResult.detectedType !== 'Mixed Waste' && analysisResult.detectedType !== 'Uncertain')
-                                ? `This looks like ${analysisResult.detectedType}. Please use the 'Log ${analysisResult.detectedType}' option.`
-                                : analysisResult.reason
-                            }
-                          </p>
-
+                         <CheckCircle className="h-4 w-4" />
+                         <p>Thank you for your submission! Points have been added to your account.</p>
                     </div>
-                    {!analysisResult.correct && (
-                        <Button size="sm" variant="secondary" className="gap-2" asChild>
-                           <Link href="/training">
-                             <GraduationCap />
-                             Learn How
-                           </Link>
-                        </Button>
-                    )}
                 </div>
             )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={resetState}>
-            {analysisResult?.correct ? 'Done' : 'Close'}
+            {submitted ? 'Done' : 'Close'}
           </Button>
         </DialogFooter>
       </DialogContent>

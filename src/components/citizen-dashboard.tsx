@@ -20,7 +20,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useLanguage } from '@/hooks/use-language';
 import { Progress } from './ui/progress';
 import { WasteLogDialog } from './waste-log-dialog';
-import { WasteScannerDialog } from './waste-scanner-dialog';
 
 const reportCategories: { category: IssueCategory; icon: React.ReactNode; description: string; }[] = [
     { category: 'Overflowing Bins', icon: <Trash2 className="h-8 w-8" />, description: 'Public bin is full.'},
@@ -117,7 +116,7 @@ export function CitizenDashboard() {
          </CardContent>
        </Card>
 
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
             <Card>
                 <CardHeader>
                     <CardTitle>3-Bin Waste Tracking</CardTitle>
@@ -127,15 +126,6 @@ export function CitizenDashboard() {
                     <WasteLogDialog wasteType="Dry Waste" />
                     <WasteLogDialog wasteType="Wet Waste" />
                     <WasteLogDialog wasteType="Hazardous Waste" />
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Waste Scanner</CardTitle>
-                    <CardDescription>Upload a picture to detect if waste is Dry, Wet, or Hazardous before logging.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <WasteScannerDialog />
                 </CardContent>
             </Card>
             <Card className="flex flex-col">

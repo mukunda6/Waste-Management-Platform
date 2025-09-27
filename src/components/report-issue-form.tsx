@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -26,7 +25,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { addIssue, getIssues } from '@/lib/firebase-service';
+import { addIssue } from '@/lib/firebase-service';
 import {
   Dialog,
   DialogContent,
@@ -34,22 +33,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { checkImageClarity } from '@/ai/flows/image-clarity-check';
-import { detectDuplicateIssue } from '@/ai/flows/duplicate-issue-detection';
 import {
   Image as ImageIcon,
   Loader2,
   AlertTriangle,
-  CheckCircle,
   Camera,
-  Info,
 } from 'lucide-react';
 import Image from 'next/image';
 import type { AppUser, IssueCategory, EmergencyCategory } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { CameraCapture } from './camera-capture';
 import { cn } from '@/lib/utils';
-import { Alert, AlertTitle } from './ui/alert';
 import { useAuth } from '@/hooks/use-auth';
 
 const allCategories: (IssueCategory | EmergencyCategory)[] = [
@@ -107,11 +101,6 @@ export function ReportIssueForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
-  const [imageClarity, setImageClarity] = useState<{
-    status: 'idle' | 'checking' | 'clear' | 'unclear';
-    reason?: string;
-    wasteType?: 'Dry Waste' | 'Wet Waste' | 'Uncertain';
-  }>({ status: 'idle' });
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -129,35 +118,12 @@ export function ReportIssueForm({
   }, [initialCategory, form]);
 
   const processImage = (file: File) => {
-    setImageClarity({ status: 'checking' });
     setImagePreview(URL.createObjectURL(file));
 
     const reader = new FileReader();
     reader.onload = async e => {
       const dataUri = e.target?.result as string;
       form.setValue('photoDataUri', dataUri, { shouldValidate: true });
-
-      try {
-        const clarityResult = await checkImageClarity({ photoDataUri: dataUri });
-        if (clarityResult.isClear) {
-          setImageClarity({ status: 'clear', wasteType: clarityResult.wasteType });
-        } else {
-          setImageClarity({ status: 'unclear', reason: clarityResult.reason, wasteType: clarityResult.wasteType });
-          form.setError('photoDataUri', {
-            type: 'manual',
-            message:
-              clarityResult.reason || 'Image is not clear. Please try another.',
-          });
-        }
-      } catch (error) {
-        console.error('Clarity check failed:', error);
-        setImageClarity({ status: 'idle' }); // Reset on error
-        toast({
-          variant: 'destructive',
-          title: 'Clarity Check Failed',
-          description: 'Could not analyze the image. Please try again.',
-        });
-      }
     };
     reader.readAsDataURL(file);
 
@@ -191,57 +157,7 @@ export function ReportIssueForm({
   }
 
   const onSubmit = async (data: FormData) => {
-    if (imageClarity.status === 'unclear') {
-        toast({
-            variant: 'destructive',
-            title: 'Unclear Image',
-            description: 'Please upload a clear image before submitting.',
-        });
-        return;
-    }
-    
     setIsSubmitting(true);
-    try {
-      const existingIssues = await getIssues();
-      if (existingIssues.length > 0) {
-        const existingIssueData = JSON.stringify(
-          existingIssues.map(i => ({ id: i.id, description: i.description, title: i.title, location: i.location }))
-        );
-
-        const duplicateResult = await detectDuplicateIssue({
-          ...data,
-          location: `${data.location.lat}, ${data.location.lng}`,
-          existingIssueData,
-        });
-        
-        if (duplicateResult.isDuplicate && duplicateResult.confidence > 0.8) {
-          toast({
-            title: "This issue has already been reported.",
-            variant: 'default',
-            duration: 5000,
-          });
-          setIsSubmitting(false);
-          return;
-        }
-      }
-
-      await finishSubmission();
-
-    } catch (error) {
-      console.error('Submission failed:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Submission Failed',
-        description: 'An unexpected error occurred. Please try again.',
-      });
-      setIsSubmitting(false);
-    }
-  };
-  
-  const finishSubmission = async () => {
-    setIsSubmitting(true); 
-    const data = form.getValues();
-
     try {
         const newIssue = await addIssue({ ...data, isEmergency }, user);
         await refreshUser(); // Refresh user to get updated score
@@ -251,7 +167,6 @@ export function ReportIssueForm({
         });
         form.reset();
         setImagePreview(null);
-        setImageClarity({status: 'idle'});
         router.push(`/dashboard?newIssueId=${newIssue.id}`);
     } catch (error) {
         console.error('Error adding issue:', error);
@@ -281,7 +196,6 @@ export function ReportIssueForm({
                       className="hidden"
                       id={photoInputId}
                       onChange={handleFileChange}
-                      disabled={imageClarity.status === 'checking'}
                     />
                     <div className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg">
                       {imagePreview ? (
@@ -321,13 +235,6 @@ export function ReportIssueForm({
                     </div>
                   </div>
                 </FormControl>
-                {imageClarity.status !== 'idle' && (
-                    <FormDescription className="flex items-center gap-2">
-                        {imageClarity.status === 'checking' && <> <Loader2 className="h-4 w-4 animate-spin"/> Checking image clarity & type...</>}
-                        {imageClarity.status === 'clear' && <> <CheckCircle className="h-4 w-4 text-green-500"/> Image is clear. AI classified as: {imageClarity.wasteType}</>}
-                        {imageClarity.status === 'unclear' && <> <AlertTriangle className="h-4 w-4 text-destructive"/> Image may be unclear. Reason: {imageClarity.reason}</>}
-                    </FormDescription>
-                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -376,7 +283,7 @@ export function ReportIssueForm({
             )}
           />
 
-          <Button type="submit" disabled={isSubmitting || imageClarity.status === 'checking'} className={cn("w-full", isEmergency && "bg-destructive hover:bg-destructive/90")}>
+          <Button type="submit" disabled={isSubmitting} className={cn("w-full", isEmergency && "bg-destructive hover:bg-destructive/90")}>
             {isSubmitting && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}

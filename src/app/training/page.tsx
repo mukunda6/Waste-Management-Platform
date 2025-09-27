@@ -25,7 +25,7 @@ import { GraduationCap, Award, Recycle, CheckCircle, Lightbulb, Star, Info, Pack
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import Confetti from 'react-confetti';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult, DroppableProps } from 'react-beautiful-dnd';
 
 // Helper to reorder lists
 const reorder = (list: any[], startIndex: number, endIndex: number) => {
@@ -83,6 +83,22 @@ const modules = [
     badge: { name: 'Reuse Rockstar', icon: <Lightbulb className="h-4 w-4" /> },
   },
 ];
+
+// Wrapper to fix strict mode issue with react-beautiful-dnd
+const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
+  const [enabled, setEnabled] = useState(false);
+  useEffect(() => {
+    const animation = requestAnimationFrame(() => setEnabled(true));
+    return () => {
+      cancelAnimationFrame(animation);
+      setEnabled(false);
+    };
+  }, []);
+  if (!enabled) {
+    return null;
+  }
+  return <Droppable {...props}>{children}</Droppable>;
+};
 
 const WasteSortingGame = ({ onGameComplete }: { onGameComplete: () => void }) => {
     const [state, setState] = useState({
@@ -156,7 +172,7 @@ const WasteSortingGame = ({ onGameComplete }: { onGameComplete: () => void }) =>
     return (
         <DragDropContext onDragEnd={onDragEnd}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Droppable droppableId="items">
+                <StrictModeDroppable droppableId="items">
                     {(provided) => (
                         <div ref={provided.innerRef} {...provided.droppableProps} className="p-4 bg-muted/50 rounded-lg min-h-[200px]">
                             <h4 className="font-semibold mb-3 text-center">Waste Items</h4>
@@ -164,9 +180,9 @@ const WasteSortingGame = ({ onGameComplete }: { onGameComplete: () => void }) =>
                             {provided.placeholder}
                         </div>
                     )}
-                </Droppable>
+                </StrictModeDroppable>
 
-                <Droppable droppableId="Dry Waste">
+                <StrictModeDroppable droppableId="Dry Waste">
                     {(provided, snapshot) => (
                         <div
                             ref={provided.innerRef}
@@ -178,9 +194,9 @@ const WasteSortingGame = ({ onGameComplete }: { onGameComplete: () => void }) =>
                             {provided.placeholder}
                         </div>
                     )}
-                </Droppable>
+                </StrictModeDroppable>
                 
-                <Droppable droppableId="Wet Waste">
+                <StrictModeDroppable droppableId="Wet Waste">
                     {(provided, snapshot) => (
                         <div
                             ref={provided.innerRef}
@@ -192,7 +208,7 @@ const WasteSortingGame = ({ onGameComplete }: { onGameComplete: () => void }) =>
                             {provided.placeholder}
                         </div>
                     )}
-                </Droppable>
+                </StrictModeDroppable>
             </div>
              {state.items.length === 0 && !Object.values(feedback).every(f => f === 'correct') && (
                 <p className="text-red-600 text-center mt-4 font-semibold">

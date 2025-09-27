@@ -325,7 +325,7 @@ export default function LoginPage() {
             Waste Management Platform
           </CardTitle>
           <CardDescription className="text-lg font-semibold text-primary !mt-2" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.1)'}}>
-            Segregate. Report. Recycle.
+            Learn. Segregate. Earn. Impact.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -366,5 +366,3 @@ export default function LoginPage() {
     </div>
   )
 }
-
-    

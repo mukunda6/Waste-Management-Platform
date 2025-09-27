@@ -51,7 +51,7 @@ You will be given a photo and the type of waste the user claims it is.
 1.  **Analyze the image:** Carefully examine the contents of the waste bin or pile in the photo.
 2.  **Identify Actual Waste Type:** First, determine the primary type of waste visible in the image. Classify it as 'Wet Waste', 'Dry Waste', 'Hazardous Waste', or 'Mixed Waste' if multiple types are present. If you cannot be certain, use 'Uncertain'. Set the \`detectedWasteType\` field with this value.
 3.  **Compare and Decide:** Compare your detected waste type with the user's \`expectedWasteType\`.
-    *   Set \`isCorrectlySegregated\` to \`true\` if the \`detectedWasteType\` (or a component of it, in case of mixed waste) matches the \`expectedWasteType\`.
+    *   Set \`isCorrectlySegregated\` to \`true\` if the \`detectedWasteType\` matches the \`expectedWasteType\`.
     *   Set \`isCorrectlySegregated\` to \`false\` if they do not match.
 4.  **Provide a Reason:** Briefly explain your decision in the \`reason\` field.
     *   If correct: "Correct. The image contains only {detectedWasteType}."

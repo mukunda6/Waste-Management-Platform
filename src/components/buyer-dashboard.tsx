@@ -117,8 +117,8 @@ export function BuyerDashboard() {
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Product</TableHead>
-                                            <TableHead className="text-center">Quantity</TableHead>
-                                            <TableHead className="text-right">Price</TableHead>
+                                            <TableHead className="text-center">Qty (Tons)</TableHead>
+                                            <TableHead className="text-right">Action</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -126,17 +126,24 @@ export function BuyerDashboard() {
                                             <TableRow key={p.name}>
                                                 <TableCell className="font-medium flex items-center gap-2">
                                                     <div className="h-2 w-2 rounded-full" style={{backgroundColor: p.fill}}/>
-                                                    {p.name}
+                                                    <div>
+                                                        <p>{p.name}</p>
+                                                        <p className="text-xs text-muted-foreground">${p.pricePerTon}/Ton</p>
+                                                    </div>
                                                 </TableCell>
-                                                <TableCell className="text-center">{p.value} T</TableCell>
-                                                <TableCell className="text-right">${p.pricePerTon}/T</TableCell>
+                                                <TableCell className="text-center">{p.value}</TableCell>
+                                                <TableCell className="text-right">
+                                                    <Button size="sm">
+                                                        <ShoppingCart className="h-4 w-4 mr-2"/>
+                                                        Order
+                                                    </Button>
+                                                </TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
                                 </Table>
 
                              </div>
-                             <Button className="w-full mt-6">Place Inquiry</Button>
                         </CardContent>
                     </Card>
                 ))}

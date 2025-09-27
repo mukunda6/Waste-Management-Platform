@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/table';
 import { getIssues, getWorkers } from '@/lib/firebase-service';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Trophy, Gift, DollarSign, Star, TrendingUp, Zap, CheckCircle, Coins, ShoppingCart, Utensils, Droplets } from 'lucide-react';
+import { Trophy, Gift, DollarSign, Star, TrendingUp, Zap, CheckCircle, Coins, ShoppingCart, Utensils, Droplets, GlassWater, Cookie, Milk, Package } from 'lucide-react';
 import type { Issue } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -38,10 +38,14 @@ type UserStats = {
 };
 
 const storeItems = [
-    { name: 'Rice Packet (1kg)', cost: 150, icon: <Utensils className="h-8 w-8 text-primary" />, imageHint: 'rice bag' },
+    { name: 'Biscuit Packet', cost: 20, icon: <Cookie className="h-8 w-8 text-primary" />, imageHint: 'biscuit packet' },
+    { name: 'Juice Box', cost: 25, icon: <GlassWater className="h-8 w-8 text-primary" />, imageHint: 'juice box' },
+    { name: 'Soap Bar', cost: 30, icon: <Package className="h-8 w-8 text-primary" />, imageHint: 'soap bar' },
+    { name: 'Bread Loaf', cost: 40, icon: <Utensils className="h-8 w-8 text-primary" />, imageHint: 'bread loaf' },
+    { name: 'Detergent (500g)', cost: 50, icon: <Gift className="h-8 w-8 text-primary" />, imageHint: 'detergent box' },
+    { name: 'Milk Packet (1L)', cost: 60, icon: <Milk className="h-8 w-8 text-primary" />, imageHint: 'milk packet' },
     { name: 'Cooking Oil (1L)', cost: 120, icon: <Droplets className="h-8 w-8 text-primary" />, imageHint: 'oil bottle' },
-    { name: 'Soap Bar', cost: 30, icon: <Gift className="h-8 w-8 text-primary" />, imageHint: 'soap bar' },
-    { name: 'Detergent Powder (500g)', cost: 50, icon: <Gift className="h-8 w-8 text-primary" />, imageHint: 'detergent box' },
+    { name: 'Rice Packet (1kg)', cost: 150, icon: <Utensils className="h-8 w-8 text-primary" />, imageHint: 'rice bag' },
 ];
 
 
@@ -239,7 +243,7 @@ export default function UserLeaderboardPage() {
             </CardDescription>
         </CardHeader>
         <CardContent>
-           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
              {storeItems.map(item => (
                 <Card key={item.name}>
                     <CardContent className="p-4 flex flex-col items-center justify-center text-center">

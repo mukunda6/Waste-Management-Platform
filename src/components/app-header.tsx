@@ -20,6 +20,7 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useEffect, useState } from 'react';
+import { CivicSolveLogo } from './icons';
 
 
 export function AppHeader() {
@@ -37,6 +38,10 @@ export function AppHeader() {
             <SidebarTrigger />
         </div>
       )}
+       <div className="hidden md:flex items-center gap-2 font-semibold font-headline text-lg">
+          <CivicSolveLogo className="h-8 w-8 text-primary" />
+          <span className="hidden lg:block">Waste Mgmt</span>
+      </div>
       <div className="flex-1" />
       <UserMenu />
     </header>

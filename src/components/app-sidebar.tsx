@@ -50,7 +50,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r bg-sidebar text-sidebar-foreground dark:bg-card dark:text-foreground">
-      <SidebarHeader className="p-4">
+      <SidebarHeader className="p-4 hidden">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold font-headline text-lg">
           <CivicSolveLogo className="h-8 w-8 text-primary" />
           <span>Waste Mgmt</span>

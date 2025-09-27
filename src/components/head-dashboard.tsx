@@ -13,7 +13,7 @@ import { getIssues } from '@/lib/firebase-service';
 import type { Issue } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { BarChart, LineChart, Line, Legend, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, LineChart, Line, Legend, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { Map, Recycle, TrendingUp, Atom, Leaf, Fuel, Percent, Trash2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
@@ -219,5 +219,7 @@ export function HeadDashboard() {
     </div>
   )
 }
+
+    
 
     

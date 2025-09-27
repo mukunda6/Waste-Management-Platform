@@ -49,23 +49,20 @@ import type { AppUser, IssueCategory, EmergencyCategory } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { CameraCapture } from './camera-capture';
 import { cn } from '@/lib/utils';
+import { Alert, AlertTitle } from './ui/alert';
 
 const allCategories: (IssueCategory | EmergencyCategory)[] = [
-    'Garbage & Waste Management Problems',
-    'Water Supply Quality',
-    'Drainage Issues',
-    'Roads, Footpaths & Infrastructure Damage',
-    'Streetlights & Electricity Failures',
-    'Parks, Trees & Environmental Concerns',
-    'Illegal Constructions & Encroachments',
-    'Stray Animals & Public Health Hazards',
-    'Sanitation & Toiletry Issues',
-    'Mosquito Control & Fogging',
-    'Pipeline Burst',
-    'Road Accident',
-    'Fire Hazard',
-    'Medical Waste',
-    'Major Blockage',
+    'Garbage Not Collected',
+    'Overflowing Bins',
+    'Illegal Dumping',
+    'Non-segregation of Waste',
+    'Collection Vehicle Late',
+    'Public Area Unclean',
+    'Hazardous Waste Spillage',
+    'Biomedical Waste Dumped',
+    'Dead Animal',
+    'Chemical Leak',
+    'Major Garbage Fire',
 ];
 
 const formSchema = z.object({
@@ -94,7 +91,7 @@ export function ReportIssueForm({
     isEmergency = false, 
     allowedCategories = allCategories,
     categoryTitle = 'Category',
-    categoryPlaceholder = 'Select an issue category',
+    categoryPlaceholder = 'Select a waste issue category',
     initialCategory = null,
 }: ReportIssueFormProps) {
   const router = useRouter();
@@ -197,8 +194,7 @@ export function ReportIssueForm({
     setIsSubmitting(true);
     try {
       const existingIssues = await getIssues();
-      // Only run duplicate check if there are issues to check against and it's not an emergency
-      if (existingIssues.length > 0 && !isEmergency) {
+      if (existingIssues.length > 0) {
         const existingIssueData = JSON.stringify(
           existingIssues.map(i => ({ id: i.id, description: i.description, title: i.title, location: i.location }))
         );
@@ -209,19 +205,17 @@ export function ReportIssueForm({
           existingIssueData,
         });
         
-        // Use a reasonable confidence threshold
         if (duplicateResult.isDuplicate && duplicateResult.confidence > 0.8) {
           toast({
-            title: 'Duplicate Report',
-            description: 'This issue has already been reported.',
+            title: "This issue has already been reported.",
+            variant: 'default',
             duration: 5000,
           });
-          setIsSubmitting(false); // Stop submission
+          setIsSubmitting(false);
           return;
         }
       }
 
-      // If no duplicates are found or it's an emergency, proceed to submit
       await finishSubmission();
 
     } catch (error) {
@@ -236,7 +230,7 @@ export function ReportIssueForm({
   };
   
   const finishSubmission = async () => {
-    setIsSubmitting(true); // Ensure submitting state is true
+    setIsSubmitting(true); 
     const data = form.getValues();
 
     try {
@@ -319,8 +313,8 @@ export function ReportIssueForm({
                 </FormControl>
                 {imageClarity.status !== 'idle' && (
                     <FormDescription className="flex items-center gap-2">
-                        {imageClarity.status === 'checking' && <> <Loader2 className="h-4 w-4 animate-spin"/> Checking image clarity...</>}
-                        {imageClarity.status === 'clear' && <> <CheckCircle className="h-4 w-4 text-green-500"/> Image is clear.</>}
+                        {imageClarity.status === 'checking' && <> <Loader2 className="h-4 w-4 animate-spin"/> Checking image clarity & type...</>}
+                        {imageClarity.status === 'clear' && <> <CheckCircle className="h-4 w-4 text-green-500"/> Image is clear. AI classified as: Dry Waste</>}
                         {imageClarity.status === 'unclear' && <> <AlertTriangle className="h-4 w-4 text-destructive"/> Image may be unclear. Reason: {imageClarity.reason}</>}
                     </FormDescription>
                 )}

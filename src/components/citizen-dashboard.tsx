@@ -14,28 +14,19 @@ import { Button } from '@/components/ui/button';
 import { getIssuesByUser } from '@/lib/firebase-service';
 import type { Issue, IssueCategory } from '@/lib/types';
 import { IssueCard } from './issue-card';
-import { FilePlus2, Clock, CheckCircle, AlertTriangle, Droplets, Construction, Trash2, Lightbulb, TreePine, Home, Dog, Cloudy, ChevronDown } from 'lucide-react';
+import { FilePlus2, Clock, CheckCircle, AlertTriangle, Trash2, ShoppingCart, BookOpen, Recycle, Biohazard } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
-import { Badge } from './ui/badge';
-import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/use-language';
+import { Progress } from './ui/progress';
 
-const categoryDetails: { category: IssueCategory; icon: React.ReactNode; description: string; }[] = [
-    { category: 'Garbage & Waste Management Problems', icon: <Trash2 className="h-8 w-8" />, description: 'Overflowing bins, illegal dumping.'},
-    { category: 'Water Supply Quality', icon: <Droplets className="h-8 w-8" />, description: 'Contamination, low pressure.' },
-    { category: 'Drainage Issues', icon: <Cloudy className="h-8 w-8" />, description: 'Blocked drains, overflowing sewers.' },
-    { category: 'Roads, Footpaths & Infrastructure Damage', icon: <Construction className="h-8 w-8" />, description: 'Potholes, broken sidewalks.' },
-    { category: 'Streetlights & Electricity Failures', icon: <Lightbulb className="h-8 w-8" />, description: 'Outages, flickering lights.' },
-    { category: 'Parks, Trees & Environmental Concerns', icon: <TreePine className="h-8 w-8" />, description: 'Fallen trees, park maintenance.' },
-    { category: 'Illegal Constructions & Encroachments', icon: <Home className="h-8 w-8" />, description: 'Unauthorized buildings.' },
-    { category: 'Stray Animals & Public Health Hazards', icon: <Dog className="h-8 w-8" />, description: 'Stray dogs, animal control.' },
-    { category: 'Sanitation & Toiletry Issues', icon: <Home className="h-8 w-8" />, description: 'Public toilet cleanliness.' },
-    { category: 'Mosquito Control & Fogging', icon: <Cloudy className="h-8 w-8" />, description: 'Fogging requests, stagnant water.' },
+const wasteCategories: { category: IssueCategory; icon: React.ReactNode; description: string; }[] = [
+    { category: 'Overflowing Bins', icon: <Trash2 className="h-8 w-8" />, description: 'Public bin is full.'},
+    { category: 'Illegal Dumping', icon: <Trash2 className="h-8 w-8" />, description: 'Waste dumped in public space.' },
+    { category: 'Garbage Not Collected', icon: <Trash2 className="h-8 w-8" />, description: 'Home or street collection missed.' },
+    { category: 'Non-segregation of Waste', icon: <Recycle className="h-8 w-8" />, description: 'Mixed waste not segregated.' },
 ];
-
 
 export function CitizenDashboard() {
   const { user } = useAuth();
@@ -48,11 +39,9 @@ export function CitizenDashboard() {
   const { t } = useLanguage();
 
   useEffect(() => {
-    // Check for a recently submitted issue ID from the query params
     const newIssueId = searchParams.get('newIssueId');
     if (newIssueId) {
       setHighlightedIssueId(newIssueId);
-      // Clean the URL
       router.replace('/dashboard', { scroll: false });
     }
   }, [searchParams, router]);
@@ -93,33 +82,88 @@ export function CitizenDashboard() {
     <div className="grid gap-8">
        <Card>
          <CardHeader>
-            <CardTitle>{t('report_new_issue')}</CardTitle>
-            <CardDescription>{t('report_new_issue_desc')}</CardDescription>
+            <CardTitle>Waste Report Hub</CardTitle>
+            <CardDescription>Report waste-related issues, log your disposal, or learn more about waste management.</CardDescription>
          </CardHeader>
          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                  <Link
                     href="/report/emergency"
-                    className="col-span-2 md:col-span-1 lg:col-span-1 text-center p-4 rounded-lg border border-destructive bg-destructive/10 hover:bg-destructive/20 transition-all flex flex-col items-center justify-center shadow-sm"
+                    className="col-span-full md:col-span-1 lg:col-span-1 text-center p-4 rounded-lg border border-destructive bg-destructive/10 hover:bg-destructive/20 transition-all flex flex-col items-center justify-center shadow-sm"
                 >
                     <div className="text-destructive mb-2"><AlertTriangle className="h-8 w-8" /></div>
-                    <h3 className="font-semibold text-sm text-destructive">{t('emergency_report')}</h3>
-                    <p className="text-xs text-destructive/80 mt-1">{t('emergency_report_desc')}</p>
+                    <h3 className="font-semibold text-sm text-destructive">Emergency Waste Report</h3>
+                    <p className="text-xs text-destructive/80 mt-1">For hazardous spills, biohazards, dead animals.</p>
                 </Link>
-                {categoryDetails.map(({ category, icon, description }) => (
+                {wasteCategories.map(({ category, icon, description }) => (
                     <button
                         key={category}
                         onClick={() => handleCategoryClick(category)}
                         className="text-center p-4 rounded-lg border bg-card hover:bg-accent hover:text-accent-foreground transition-all flex flex-col items-center justify-center shadow-sm"
                     >
                         <div className="text-primary mb-2">{icon}</div>
-                        <h3 className="font-semibold text-sm">{t(category.split(' & ')[0].trim().toLowerCase().replace(/ /g, '_'))}</h3>
-                        <p className="text-xs text-muted-foreground mt-1">{t(description.toLowerCase().replace(/, /g, '_').replace(/ /g, '_'))}</p>
+                        <h3 className="font-semibold text-sm">{category}</h3>
+                        <p className="text-xs text-muted-foreground mt-1">{description}</p>
                     </button>
                 ))}
             </div>
          </CardContent>
        </Card>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Card>
+                <CardHeader>
+                    <CardTitle>3-Bin Waste Tracking</CardTitle>
+                    <CardDescription>Log your daily segregated waste disposal to earn compliance points.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Dry Waste</span>
+                        <Button size="sm" variant="outline">Log</Button>
+                    </div>
+                     <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Wet Waste</span>
+                        <Button size="sm" variant="outline">Log</Button>
+                    </div>
+                     <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Hazardous Waste</span>
+                        <Button size="sm" variant="destructive">Log</Button>
+                    </div>
+                </CardContent>
+            </Card>
+            <Card className="flex flex-col">
+                <CardHeader>
+                    <CardTitle>Training Hub</CardTitle>
+                    <CardDescription>Complete modules to become a "Green Champion".</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col justify-center">
+                     <div>
+                        <div className="flex justify-between items-center mb-1">
+                            <p className="text-sm font-medium">Your Progress</p>
+                            <p className="text-sm font-bold">2 / 3 Modules</p>
+                        </div>
+                        <Progress value={66} />
+                    </div>
+                </CardContent>
+                <div className="p-6 pt-0">
+                    <Button className="w-full" asChild>
+                        <Link href="/training"><BookOpen/>Go to Training</Link>
+                    </Button>
+                </div>
+            </Card>
+             <Card>
+                <CardHeader>
+                    <CardTitle>Compost Kit Shop</CardTitle>
+                    <CardDescription>Use your coins to buy bins, compost kits, and more.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center justify-center h-full">
+                    <ShoppingCart className="h-16 w-16 text-muted-foreground mb-4"/>
+                    <Button asChild>
+                        <Link href="#"><ShoppingCart/>Browse Store</Link>
+                    </Button>
+                </CardContent>
+            </Card>
+        </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
@@ -138,7 +182,7 @@ export function CitizenDashboard() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('in_progress')}</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('in_progress')}</CardTitle>cv
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>

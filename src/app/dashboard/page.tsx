@@ -52,13 +52,13 @@ function DashboardContent() {
   const getDashboardDescription = () => {
     switch (user.role) {
       case 'Citizen':
-        return 'Track your reports and see community issues.'
+        return 'Manage your waste segregation, report issues, and track your green score.'
       case 'Admin':
-        return 'Assign issues and manage field workers.'
+        return 'Monitor compliance, assign tasks, and manage waste facilities.'
       case 'Head':
-        return 'Top-level overview of the entire system.'
+        return 'City-wide analytics on waste management and policy effectiveness.'
       case 'Worker':
-        return 'View and manage your assigned tasks.'
+        return 'View and manage your assigned waste collection tasks.'
       default:
         return 'Track your reports and see community issues.'
     }
@@ -67,13 +67,13 @@ function DashboardContent() {
   const getRoleTitle = () => {
      switch (user.role) {
       case 'Citizen':
-        return 'Citizen Dashboard';
+        return 'Citizen Waste Dashboard';
       case 'Admin':
-        return 'Admin Dashboard';
+        return 'Waste Management Admin';
       case 'Head':
-        return 'Head Dashboard';
+        return 'City-Wide Waste Analytics';
        case 'Worker':
-        return 'Worker Dashboard';
+        return 'Waste Worker Dashboard';
       default:
         return 'Dashboard';
     }

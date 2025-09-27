@@ -17,8 +17,8 @@ import { LanguageSwitcher } from '@/components/language-switcher';
 import { LanguageProvider } from '@/hooks/use-language';
 
 const metadata: Metadata = {
-  title: 'CivicSolve',
-  description: 'Report and resolve civic issues in your community.',
+  title: 'SIH 60 Waste Management',
+  description: 'A platform for efficient waste management and citizen engagement.',
 }
 
 function AppContent({ children }: { children: React.ReactNode }) {

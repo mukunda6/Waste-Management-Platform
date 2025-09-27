@@ -38,7 +38,7 @@ export function WorkerDashboard({ user }: { user: AppUser }) {
     return <div>Loading your assigned tasks...</div>;
   }
 
-  const highPriorityIssues = assignedIssues.filter(i => i.category === 'Roads, Footpaths & Infrastructure Damage' || i.category === 'Streetlights & Electricity Failures');
+  const highPriorityIssues = assignedIssues.filter(i => i.isEmergency);
 
   return (
     <div className="grid gap-8">
@@ -53,7 +53,7 @@ export function WorkerDashboard({ user }: { user: AppUser }) {
           <CardContent>
             <div className="text-2xl font-bold">{assignedIssues.length}</div>
             <p className="text-xs text-muted-foreground">
-              Open issues assigned to you
+              Open waste collection tasks.
             </p>
           </CardContent>
         </Card>
@@ -65,7 +65,7 @@ export function WorkerDashboard({ user }: { user: AppUser }) {
           <CardContent>
             <div className="text-2xl font-bold">{highPriorityIssues.length}</div>
             <p className="text-xs text-muted-foreground">
-              Urgent tasks requiring attention
+              Emergency tasks requiring immediate action.
             </p>
           </CardContent>
         </Card>
@@ -87,7 +87,7 @@ export function WorkerDashboard({ user }: { user: AppUser }) {
         <CardHeader>
           <CardTitle>My Task Queue</CardTitle>
           <CardDescription>
-            These are the active issues assigned to you. Update them as you make progress.
+            These are the active waste collection and verification tasks assigned to you.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-6">

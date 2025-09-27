@@ -13,49 +13,51 @@ import { getIssues } from '@/lib/firebase-service';
 import type { Issue } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { BarChart, PieChart, DonutChart, Legend, Bar, XAxis, YAxis, Tooltip, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { BarChart, PieChart, LineChart, Line, Legend, Bar, XAxis, YAxis, Tooltip, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
-import { useLanguage } from '@/hooks/use-language';
-
+import { Users, Map, Recycle, TrendingUp } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 
 type CityData = {
     city: string;
-    submitted: number;
-    inProgress: number;
-    resolved: number;
+    segregationRate: number;
+    landfillLoad: number;
 }
 
-type CategoryData = {
+type FacilityData = {
     name: string;
-    count: number;
+    usage: number;
 }
 
-const chartConfig = {
-  submitted: {
-    label: "Submitted",
-    color: "hsl(var(--chart-1))",
-  },
-  inProgress: {
-    label: "In Progress",
-    color: "hsl(var(--chart-2))",
-  },
-  resolved: {
-    label: "Resolved",
-    color: "hsl(var(--chart-3))",
-  },
-};
+const cityData: CityData[] = [
+    { city: 'Zone A', segregationRate: 85, landfillLoad: 1200 },
+    { city: 'Zone B', segregationRate: 72, landfillLoad: 1500 },
+    { city: 'Zone C', segregationRate: 91, landfillLoad: 950 },
+    { city: 'Zone D', segregationRate: 65, landfillLoad: 1800 },
+];
+
+const facilityData: FacilityData[] = [
+    { name: 'Bio-Plant 1', usage: 78 },
+    { name: 'W-to-E Plant', usage: 92 },
+    { name: 'Recycling Center A', usage: 65 },
+    { name: 'Scrap Shop Hub', usage: 88 },
+];
+
+const greenChampions = [
+    { name: 'Green Enclave Apartments', type: 'Bulk Generator', compliance: 98 },
+    { name: 'Commerce Street Assn.', type: 'Commercial Area', compliance: 92 },
+    { name: 'Ward 15 Committee', type: 'Ward', compliance: 85 },
+];
+
 
 export function HeadDashboard() {
-  const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const { t } = useLanguage();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const fetchedIssues = await getIssues();
-        setIssues(fetchedIssues);
+        await getIssues();
       } catch (error) {
         console.error("Error fetching head data:", error);
         toast({
@@ -70,81 +72,46 @@ export function HeadDashboard() {
     fetchData();
   }, [toast]);
   
-  const cityData: CityData[] = issues.reduce((acc, issue) => {
-    const city = issue.city || 'Unknown';
-    let cityEntry = acc.find(c => c.city === city);
-    if(!cityEntry) {
-        cityEntry = { city, submitted: 0, inProgress: 0, resolved: 0 };
-        acc.push(cityEntry);
-    }
-    if(issue.status === 'Submitted') cityEntry.submitted++;
-    if(issue.status === 'In Progress') cityEntry.inProgress++;
-    if(issue.status === 'Resolved') cityEntry.resolved++;
-
-    return acc;
-  }, [] as CityData[]);
-
-  const statusDistribution = issues.reduce((acc, issue) => {
-    acc[issue.status] = (acc[issue.status] || 0) + 1;
-    return acc;
-  }, {} as Record<Issue['status'], number>);
-
-  const pieChartData = Object.entries(statusDistribution).map(([name, value]) => ({ name, value }));
-
-  const categoryData: CategoryData[] = issues.reduce((acc, issue) => {
-    let categoryEntry = acc.find(c => c.name === issue.category);
-    if (!categoryEntry) {
-        categoryEntry = { name: issue.category, count: 0 };
-        acc.push(categoryEntry);
-    }
-    categoryEntry.count++;
-    return acc;
-  }, [] as CategoryData[]).sort((a,b) => b.count - a.count);
-
 
   if (loading) {
-    return <div>Loading head dashboard...</div>
+    return <div>Loading City-Wide Analytics Dashboard...</div>
   }
 
   return (
     <div className="grid gap-8">
-      <CardHeader className="px-0">
-        <CardTitle>System-Wide Analytics</CardTitle>
-        <CardDescription>High-level metrics for all civic issues across all regions.</CardDescription>
-      </CardHeader>
       
       <div className="grid gap-8 lg:grid-cols-3">
         <Card className="lg:col-span-2">
             <CardHeader>
-                <CardTitle>Issues by City</CardTitle>
-                <CardDescription>Breakdown of issue statuses in each city.</CardDescription>
+                <CardTitle className="flex items-center gap-2"><Map/> City-Wide Waste Analytics</CardTitle>
+                <CardDescription>Segregation rates and landfill load across different regions/zones.</CardDescription>
             </CardHeader>
             <CardContent>
-                 <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
+                 <ChartContainer config={{}} className="min-h-[300px] w-full">
                      <BarChart data={cityData} accessibilityLayer>
                         <XAxis dataKey="city" tickLine={false} tickMargin={10} axisLine={false} />
-                        <YAxis />
+                        <YAxis yAxisId="left" orientation="left" stroke="hsl(var(--primary))" />
+                        <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--destructive))" />
                         <Tooltip content={<ChartTooltipContent />} />
                         <Legend />
-                        <Bar dataKey="submitted" stackId="a" fill="var(--color-submitted)" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="inProgress" stackId="a" fill="var(--color-inProgress)" />
-                        <Bar dataKey="resolved" stackId="a" fill="var(--color-resolved)" radius={[4, 4, 0, 0]} />
+                        <Bar yAxisId="left" dataKey="segregationRate" fill="hsl(var(--primary))" name="Segregation %" radius={[4, 4, 0, 0]} />
+                        <Line yAxisId="right" dataKey="landfillLoad" type="monotone" stroke="hsl(var(--destructive))" name="Landfill Load (Tons)" strokeWidth={2} dot={false} />
                     </BarChart>
                 </ChartContainer>
             </CardContent>
         </Card>
          <Card>
             <CardHeader>
-                <CardTitle>Overall Issue Status</CardTitle>
-                <CardDescription>Distribution of all issues by their current status.</CardDescription>
+                <CardTitle className="flex items-center gap-2"><Recycle/> Facility Usage</CardTitle>
+                <CardDescription>Current utilization of waste processing facilities.</CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
+                <ChartContainer config={{}} className="min-h-[300px] w-full">
                     <PieChart>
                         <Tooltip content={<ChartTooltipContent hideLabel />} />
-                        <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90}>
-                             {pieChartData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={chartConfig[entry.name as keyof typeof chartConfig]?.color || '#8884d8'} />
+                        <Pie data={facilityData} dataKey="usage" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90}>
+                             {facilityData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${index + 1}))`} />
                             ))}
                         </Pie>
                         <Legend />
@@ -156,24 +123,37 @@ export function HeadDashboard() {
 
        <Card>
             <CardHeader>
-                <CardTitle>Issue Breakdown by Category</CardTitle>
-                <CardDescription>Frequency of each issue type reported across the system.</CardDescription>
+                <CardTitle className="flex items-center gap-2"><Users/> Green Champions Panel</CardTitle>
+                <CardDescription>Tracking local monitoring committees (bulk generators, commercial areas, wards).</CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={{ count: { label: 'Count', color: 'hsl(var(--chart-1))' } }} className="min-h-[400px] w-full">
-                    <BarChart data={categoryData} layout="vertical" accessibilityLayer>
-                        <YAxis 
-                            dataKey="name" 
-                            type="category"
-                            width={250}
-                            tickLine={false}
-                            axisLine={false}
-                        />
-                        <XAxis type="number" hide />
-                        <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<ChartTooltipContent />} />
-                        <Bar dataKey="count" fill="var(--color-count)" radius={4} />
-                    </BarChart>
-                </ChartContainer>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Committee / Group</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead className="text-right">Compliance Rate</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {greenChampions.map(champion => (
+                            <TableRow key={champion.name}>
+                                <TableCell className="font-medium">{champion.name}</TableCell>
+                                <TableCell>{champion.type}</TableCell>
+                                <TableCell className="text-right font-bold text-primary">{champion.compliance}%</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><TrendingUp/> Policy Feedback & Reports</CardTitle>
+                <CardDescription>Generate reports on compliance, hotspots, and campaign effectiveness.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <p className="text-muted-foreground">Report generation feature coming soon. This section will allow exporting data on segregation hotspots, overall compliance trends, and the impact of awareness campaigns to inform policy decisions.</p>
             </CardContent>
         </Card>
     </div>

@@ -43,15 +43,15 @@ type Role = 'Citizen' | 'Admin' | 'Head';
 const roleCredentials: Record<Role, { email: string; description: string }> = {
     Citizen: {
         email: 'citizen@test.com',
-        description: 'Report issues and track their status.'
+        description: 'Track waste segregation, report issues, and earn rewards.'
     },
     Admin: {
         email: 'admin@test.com',
-        description: 'Assign issues and manage field workers.'
+        description: 'Manage waste collection, monitor compliance, and assign tasks.'
     },
     Head: {
         email: 'head@test.com',
-        description: 'Oversee all operations and performance.'
+        description: 'Oversee city-wide waste analytics and policy effectiveness.'
     }
 }
 
@@ -169,10 +169,10 @@ export default function LoginPage() {
             <CivicSolveLogo className="h-16 w-16 text-primary" />
           </div>
           <CardTitle className="text-3xl font-headline">
-            Welcome to CivicSolve
+            Waste Management Platform
           </CardTitle>
           <CardDescription className="text-lg font-semibold text-primary !mt-2" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.1)'}}>
-            See it. Snap it. Solve it. Together.
+            Segregate. Report. Recycle.
           </CardDescription>
         </CardHeader>
         <CardContent>

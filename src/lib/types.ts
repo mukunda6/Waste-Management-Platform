@@ -4,23 +4,19 @@ export type IssueStatus = 'Submitted' | 'In Progress' | 'Resolved';
 export type SlaStatus = 'On Time' | 'At Risk' | 'Deadline Missed' | 'Extended' | 'Escalated';
 
 export type IssueCategory = 
-  | 'Garbage & Waste Management Problems'
-  | 'Water Supply Quality'
-  | 'Drainage Issues'
-  | 'Roads, Footpaths & Infrastructure Damage'
-  | 'Streetlights & Electricity Failures'
-  | 'Parks, Trees & Environmental Concerns'
-  | 'Illegal Constructions & Encroachments'
-  | 'Stray Animals & Public Health Hazards'
-  | 'Sanitation & Toiletry Issues'
-  | 'Mosquito Control & Fogging';
+  | 'Garbage Not Collected'
+  | 'Overflowing Bins'
+  | 'Illegal Dumping'
+  | 'Non-segregation of Waste'
+  | 'Collection Vehicle Late'
+  | 'Public Area Unclean';
 
 export type EmergencyCategory =
-  | 'Pipeline Burst'
-  | 'Road Accident'
-  | 'Fire Hazard'
-  | 'Medical Waste'
-  | 'Major Blockage';
+  | 'Hazardous Waste Spillage'
+  | 'Biomedical Waste Dumped'
+  | 'Dead Animal'
+  | 'Chemical Leak'
+  | 'Major Garbage Fire';
 
 export type UserRole = 'Citizen' | 'Admin' | 'Head' | 'Worker';
 

@@ -19,13 +19,10 @@ import {
   MapPin,
   Calendar,
   User,
-  Droplets,
-  Construction,
-  TreePine,
-  Home,
-  Dog,
-  Cloudy,
   Clock,
+  Recycle,
+  Biohazard,
+  AlertTriangle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
@@ -43,21 +40,17 @@ function SafeHydrate({ children }: { children: React.ReactNode }) {
 
 
 const categoryIcons: Record<Issue['category'], React.ReactNode> = {
-  'Garbage & Waste Management Problems': <Trash2 className="h-4 w-4" />,
-  'Water Supply Quality': <Droplets className="h-4 w-4" />,
-  'Drainage Issues': <Droplets className="h-4 w-4" />,
-  'Roads, Footpaths & Infrastructure Damage': <Construction className="h-4 w-4" />,
-  'Streetlights & Electricity Failures': <Lightbulb className="h-4 w-4" />,
-  'Parks, Trees & Environmental Concerns': <TreePine className="h-4 w-4" />,
-  'Illegal Constructions & Encroachments': <Home className="h-4 w-4" />,
-  'Stray Animals & Public Health Hazards': <Dog className="h-4 w-4" />,
-  'Sanitation & Toiletry Issues': <Home className="h-4 w-4" />,
-  'Mosquito Control & Fogging': <Cloudy className="h-4 w-4" />,
-  'Pipeline Burst': <Droplets className="h-4 w-4" />,
-    'Road Accident': <Car className="h-4 w-4" />,
-    'Fire Hazard': <Lightbulb className="h-4 w-4" />,
-    'Medical Waste': <Trash2 className="h-4 w-4" />,
-    'Major Blockage': <Construction className="h-4 w-4" />,
+  'Garbage Not Collected': <Trash2 className="h-4 w-4" />,
+  'Overflowing Bins': <Trash2 className="h-4 w-4" />,
+  'Illegal Dumping': <Trash2 className="h-4 w-4" />,
+  'Non-segregation of Waste': <Recycle className="h-4 w-4" />,
+  'Collection Vehicle Late': <Car className="h-4 w-4" />,
+  'Public Area Unclean': <Trash2 className="h-4 w-4" />,
+  'Hazardous Waste Spillage': <Biohazard className="h-4 w-4" />,
+  'Biomedical Waste Dumped': <Biohazard className="h-4 w-4" />,
+  'Dead Animal': <Trash2 className="h-4 w-4" />,
+  'Chemical Leak': <AlertTriangle className="h-4 w-4" />,
+  'Major Garbage Fire': <Lightbulb className="h-4 w-4" />,
 };
 
 const statusColors: Record<Issue['status'], string> = {

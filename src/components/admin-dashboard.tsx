@@ -30,11 +30,13 @@ import type { Issue, Worker, SlaStatus } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { ListChecks, Users, AlertTriangle, Clock } from 'lucide-react';
+import { ListChecks, Users, AlertTriangle, Clock, Map, Trash2, Percent } from 'lucide-react';
 import { Button } from './ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/use-language';
+import { Bar, BarChart, CartesianGrid, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { ChartContainer, ChartTooltipContent } from './ui/chart';
 
 
 const slaStatusColors: Record<SlaStatus, string> = {
@@ -85,7 +87,7 @@ export function AdminDashboard() {
       fetchData();
       toast({
         title: 'Worker Assigned',
-        description: 'The issue has been assigned and the worker has been notified.',
+        description: 'The waste collection task has been assigned and the worker notified.',
       });
     } catch (error) {
       toast({
@@ -102,6 +104,15 @@ export function AdminDashboard() {
     return worker ? t(worker.nameKey) : 'Unknown Worker';
   };
 
+  // Mock analytics data
+  const segregationData = [
+    { name: 'Zone A', compliance: 85 },
+    { name: 'Zone B', compliance: 72 },
+    { name: 'Zone C', compliance: 91 },
+    { name: 'Zone D', compliance: 65 },
+  ];
+  const dailyWasteData = { collected: 450, processed: 380, TPD: 450 }; // in Tons
+
 
   if (loading) {
     return <div>Loading admin dashboard...</div>
@@ -109,7 +120,7 @@ export function AdminDashboard() {
 
   return (
     <div className="grid gap-8">
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Open Issues</CardTitle>
@@ -117,17 +128,17 @@ export function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{openIssues.length}</div>
-             <p className="text-xs text-muted-foreground">Total active issues in the system.</p>
+             <p className="text-xs text-muted-foreground">Total active waste complaints.</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Unassigned Issues</CardTitle>
+            <CardTitle className="text-sm font-medium">Unassigned Tasks</CardTitle>
             <AlertTriangle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{unassignedIssues.length}</div>
-            <p className="text-xs text-muted-foreground">Issues needing immediate assignment.</p>
+            <p className="text-xs text-muted-foreground">Complaints needing worker assignment.</p>
           </CardContent>
         </Card>
         <Card>
@@ -137,10 +148,57 @@ export function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{workers.length}</div>
-             <p className="text-xs text-muted-foreground">Total field workers available.</p>
+             <p className="text-xs text-muted-foreground">Waste collection staff on duty.</p>
+          </CardContent>
+        </Card>
+         <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Facilities</CardTitle>
+            <Map className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">12</div>
+             <p className="text-xs text-muted-foreground">Plants, recycling & scrap centers.</p>
           </CardContent>
         </Card>
       </div>
+
+       <div className="grid gap-8 md:grid-cols-2">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Percent /> Segregation Compliance Tracker</CardTitle>
+                    <CardDescription>Percentage of households/buildings following segregation rules by zone.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ChartContainer config={{}} className="h-64 w-full">
+                        <BarChart data={segregationData} accessibilityLayer>
+                            <CartesianGrid vertical={false} />
+                            <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} />
+                            <Tooltip cursor={{fill: 'hsl(var(--muted))'}} content={<ChartTooltipContent />} />
+                            <Bar dataKey="compliance" fill="hsl(var(--primary))" radius={4}>
+                            </Bar>
+                        </BarChart>
+                    </ChartContainer>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Trash2 /> Daily Waste Analytics</CardTitle>
+                    <CardDescription>Overview of today's total waste collected and processed.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-around items-center h-64">
+                    <div className="text-center">
+                        <p className="text-4xl font-bold">{dailyWasteData.TPD}</p>
+                        <p className="text-muted-foreground">Tons Per Day (TPD)</p>
+                    </div>
+                    <div className="text-center">
+                        <p className="text-4xl font-bold">{dailyWasteData.processed}</p>
+                        <p className="text-muted-foreground">Tons Processed</p>
+                    </div>
+                </CardContent>
+            </Card>
+       </div>
+
 
        {emergencyIssues.length > 0 && (
         <Card className="border-destructive border-2">
@@ -148,11 +206,11 @@ export function AdminDashboard() {
                 <div className="flex justify-between items-center">
                     <CardTitle className="flex items-center gap-2 text-destructive">
                         <AlertTriangle />
-                        Emergency Issues
+                        Emergency Waste Reports
                     </CardTitle>
                     <Badge variant="destructive">{emergencyIssues.length} Active</Badge>
                 </div>
-                <CardDescription>These high-priority issues require immediate attention and assignment.</CardDescription>
+                <CardDescription>These high-priority hazards require immediate attention and assignment.</CardDescription>
             </CardHeader>
             <CardContent>
                 <IssueTable issues={emergencyIssues} workers={workers} onAssign={handleAssignWorker} getWorkerName={getWorkerName} />
@@ -163,9 +221,9 @@ export function AdminDashboard() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Manage Issue Assignments</CardTitle>
+          <CardTitle>Manage Waste Complaints</CardTitle>
           <CardDescription>
-            Assign workers to unresolved standard issues.
+            Assign workers to unresolved standard waste complaints.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -183,7 +241,7 @@ const IssueTable = ({ issues, workers, onAssign, getWorkerName }: { issues: Issu
         <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Issue</TableHead>
+                <TableHead>Complaint</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>SLA Status</TableHead>
                 <TableHead>Submitted</TableHead>

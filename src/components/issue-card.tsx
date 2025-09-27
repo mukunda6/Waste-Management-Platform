@@ -12,35 +12,28 @@ import {
   Trash2,
   MapPin,
   Calendar,
-  ArrowUpRight,
-  Droplets,
   Construction,
-  TreePine,
-  Home,
-  Dog,
-  Cloudy,
   Car,
+  Biohazard,
+  Recycle,
+  AlertTriangle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 import { useState, useEffect } from 'react';
 
 const categoryDetails: Record<Issue['category'], { icon: React.ReactNode, imageHint: string }> = {
-  'Garbage & Waste Management Problems': { icon: <Trash2 className="h-4 w-4" />, imageHint: 'trash can' },
-  'Water Supply Quality': { icon: <Droplets className="h-4 w-4" />, imageHint: 'tap water' },
-  'Drainage Issues': { icon: <Droplets className="h-4 w-4" />, imageHint: 'drainage sewer' },
-  'Roads, Footpaths & Infrastructure Damage': { icon: <Construction className="h-4 w-4" />, imageHint: 'pothole road' },
-  'Streetlights & Electricity Failures': { icon: <Lightbulb className="h-4 w-4" />, imageHint: 'street light' },
-  'Parks, Trees & Environmental Concerns': { icon: <TreePine className="h-4 w-4" />, imageHint: 'park tree' },
-  'Illegal Constructions & Encroachments': { icon: <Home className="h-4 w-4" />, imageHint: 'construction site' },
-  'Stray Animals & Public Health Hazards': { icon: <Dog className="h-4 w-4" />, imageHint: 'stray dog' },
-  'Sanitation & Toiletry Issues': { icon: <Home className="h-4 w-4" />, imageHint: 'public toilet' },
-  'Mosquito Control & Fogging': { icon: <Cloudy className="h-4 w-4" />, imageHint: 'stagnant water' },
-  'Pipeline Burst': { icon: <Droplets className="h-4 w-4" />, imageHint: 'pipe burst' },
-  'Road Accident': { icon: <Car className="h-4 w-4" />, imageHint: 'car accident' },
-  'Fire Hazard': { icon: <Lightbulb className="h-4 w-4" />, imageHint: 'fire smoke' },
-  'Medical Waste': { icon: <Trash2 className="h-4 w-4" />, imageHint: 'medical waste' },
-  'Major Blockage': { icon: <Construction className="h-4 w-4" />, imageHint: 'road blockage' },
+    'Garbage Not Collected': { icon: <Trash2 className="h-4 w-4" />, imageHint: 'garbage bag' },
+    'Overflowing Bins': { icon: <Trash2 className="h-4 w-4" />, imageHint: 'trash can' },
+    'Illegal Dumping': { icon: <Trash2 className="h-4 w-4" />, imageHint: 'garbage pile' },
+    'Non-segregation of Waste': { icon: <Recycle className="h-4 w-4" />, imageHint: 'mixed waste' },
+    'Collection Vehicle Late': { icon: <Car className="h-4 w-4" />, imageHint: 'garbage truck' },
+    'Public Area Unclean': { icon: <Trash2 className="h-4 w-4" />, imageHint: 'dirty street' },
+    'Hazardous Waste Spillage': { icon: <Biohazard className="h-4 w-4" />, imageHint: 'chemical spill' },
+    'Biomedical Waste Dumped': { icon: <Biohazard className="h-4 w-4" />, imageHint: 'medical waste' },
+    'Dead Animal': { icon: <Trash2 className="h-4 w-4" />, imageHint: 'road kill' },
+    'Chemical Leak': { icon: <AlertTriangle className="h-4 w-4" />, imageHint: 'chemical barrel' },
+    'Major Garbage Fire': { icon: <Lightbulb className="h-4 w-4" />, imageHint: 'fire smoke' },
 };
 
 
@@ -74,7 +67,7 @@ export function IssueCard({ issue, userRole = 'Citizen', isHighlighted = false }
     return 'View Details';
   }
   
-  const details = categoryDetails[issue.category] || { icon: <Construction className="h-4 w-4" />, imageHint: 'issue placeholder' };
+  const details = categoryDetails[issue.category] || { icon: <Trash2 className="h-4 w-4" />, imageHint: 'waste issue' };
   const imageHint = issue.imageHint || details.imageHint;
   // Use a unique part of the issue to seed the image, like its ID or a hash of its title
   const imageSeed = imageHint.replace(/\s/g, '');

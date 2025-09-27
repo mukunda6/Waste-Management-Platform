@@ -16,11 +16,11 @@ import { Loader2, AlertTriangle } from 'lucide-react';
 import type { EmergencyCategory } from '@/lib/types';
 
 const emergencyCategories: EmergencyCategory[] = [
-    'Pipeline Burst',
-    'Road Accident',
-    'Fire Hazard',
-    'Medical Waste',
-    'Major Blockage',
+    'Hazardous Waste Spillage',
+    'Biomedical Waste Dumped',
+    'Dead Animal',
+    'Chemical Leak',
+    'Major Garbage Fire',
 ];
 
 export default function EmergencyReportPage() {
@@ -48,10 +48,10 @@ export default function EmergencyReportPage() {
         <CardHeader>
           <CardTitle className="text-2xl font-headline flex items-center gap-2 text-destructive">
             <AlertTriangle />
-            Report an Emergency Issue
+            Report an Emergency Waste Issue
           </CardTitle>
           <CardDescription>
-            This form is for critical issues requiring immediate response. Your report will be marked with the highest priority.
+            This form is for critical waste-related hazards requiring immediate response. Your report will be escalated with the highest priority.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -60,7 +60,7 @@ export default function EmergencyReportPage() {
             isEmergency={true}
             allowedCategories={emergencyCategories}
             categoryTitle="Emergency Type"
-            categoryPlaceholder="Select an emergency type"
+            categoryPlaceholder="Select an emergency waste type"
           />
         </CardContent>
       </Card>

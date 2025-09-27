@@ -25,6 +25,7 @@ import {
   Bot,
   AlertTriangle,
   BarChart,
+  GraduationCap
 } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -52,7 +53,7 @@ export function AppSidebar() {
       <SidebarHeader className="p-4">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold font-headline text-lg">
           <CivicSolveLogo className="h-8 w-8 text-primary" />
-          <span>CivicSolve</span>
+          <span>Waste Mgmt</span>
         </Link>
       </SidebarHeader>
       <SidebarContent className="p-4 flex flex-col justify-between">
@@ -80,6 +81,18 @@ export function AppSidebar() {
                   <Link href="/user-leaderboard">
                     <Trophy />
                     <span>{t('leaderboard_rewards')}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === '/training'}
+                  tooltip={'Training'}
+                >
+                  <Link href="/training">
+                    <GraduationCap />
+                    <span>{'Training Hub'}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

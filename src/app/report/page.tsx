@@ -17,16 +17,12 @@ import { Loader2 } from 'lucide-react';
 import type { IssueCategory } from '@/lib/types';
 
 const standardCategories: IssueCategory[] = [
-    'Garbage & Waste Management Problems',
-    'Water Supply Quality',
-    'Drainage Issues',
-    'Roads, Footpaths & Infrastructure Damage',
-    'Streetlights & Electricity Failures',
-    'Parks, Trees & Environmental Concerns',
-    'Illegal Constructions & Encroachments',
-    'Stray Animals & Public Health Hazards',
-    'Sanitation & Toiletry Issues',
-    'Mosquito Control & Fogging',
+    'Garbage Not Collected',
+    'Overflowing Bins',
+    'Illegal Dumping',
+    'Non-segregation of Waste',
+    'Collection Vehicle Late',
+    'Public Area Unclean',
 ];
 
 function ReportPageContent() {
@@ -54,9 +50,9 @@ function ReportPageContent() {
     <div className="max-w-2xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-headline">Report a New Issue</CardTitle>
+          <CardTitle className="text-2xl font-headline">Report a Waste Issue</CardTitle>
           <CardDescription>
-            Help improve your community by reporting issues. Please provide a clear
+            Help improve your community's waste management. Please provide a clear
             photo and description.
           </CardDescription>
         </CardHeader>

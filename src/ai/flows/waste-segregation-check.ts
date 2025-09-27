@@ -38,11 +38,15 @@ const prompt = ai.definePrompt({
   model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: CheckWasteSegregationInputSchema},
   output: {schema: CheckWasteSegregationOutputSchema},
-  prompt: `You are an expert waste management inspector. Your task is to verify if a user has correctly segregated their waste based on an uploaded image and to identify the actual waste type.
+  prompt: `You are an AI waste classification assistant for a 3-bin smart waste tracking system. Your task is to verify if a user has correctly segregated their waste based on an uploaded image and to identify the actual waste type.
 
-You will be given a photo and the type of waste the user claims it is.
+**Waste Categories:**
+*   **Dry Waste**: plastics, paper, cardboard, metals, bottles, cans.
+*   **Wet Waste**: vegetables, fruits, food scraps, garden waste, organic matter.
+*   **Hazardous Waste**: broken glass, batteries, light bulbs, paint cans, e-waste, or medical waste. It should NOT contain regular dry or wet waste.
 
-**Expected Waste Type:** {{{expectedWasteType}}}
+**User's Claim:**
+The user claims the waste is: **{{{expectedWasteType}}}**
 
 **Image to Analyze:**
 {{media url=photoDataUri}}
@@ -50,17 +54,18 @@ You will be given a photo and the type of waste the user claims it is.
 **Your Tasks:**
 1.  **Analyze the image:** Carefully examine the contents of the waste bin or pile in the photo.
 2.  **Identify Actual Waste Type:** First, determine the primary type of waste visible in the image. Classify it as 'Wet Waste', 'Dry Waste', 'Hazardous Waste', or 'Mixed Waste' if multiple types are present. If you cannot be certain, use 'Uncertain'. Set the \`detectedWasteType\` field with this value.
-3.  **Compare and Decide:** Compare your detected waste type with the user's \`expectedWasteType\`.
+3.  **Compare and Decide:** Compare your \`detectedWasteType\` with the user's \`expectedWasteType\`.
     *   Set \`isCorrectlySegregated\` to \`true\` if the \`detectedWasteType\` matches the \`expectedWasteType\`.
     *   Set \`isCorrectlySegregated\` to \`false\` if they do not match.
 4.  **Provide a Reason:** Briefly explain your decision in the \`reason\` field.
     *   If correct: "Correct. The image contains only {detectedWasteType}."
-    *   If incorrect: "Incorrect. This appears to be {detectedWasteType}, not {expectedWasteType}." or "Incorrect. Found {contaminant} in the {expectedWasteType} bin." Be specific.
+    *   If incorrect (e.g., vegetable peels in Dry Waste bin): "Incorrect. This appears to be {detectedWasteType}, not {expectedWasteType}."
+    *   If incorrect (e.g., broken glass in Wet Waste bin): "Incorrect. This appears to be Hazardous Waste because it contains broken glass." Be specific.
 
-**Definitions for Analysis:**
-*   **"Wet Waste"**: Compostable materials like vegetable waste, fruit peels, leftover food, coffee grounds, garden waste.
-*   **"Dry Waste"**: Recyclable materials like plastic bottles, plastic containers, paper, cardboard, metal cans.
-*   **"Hazardous Waste"**: Items like batteries, light bulbs, paint cans, e-waste, or broken glass. It should NOT contain regular dry or wet waste.`,
+**Be Strict:**
+- If a vegetable/food item is uploaded into Dry Waste, it is INCORRECT. The detected waste type is Wet Waste.
+- If plastic is uploaded into Wet Waste, it is INCORRECT. The detected waste type is Dry Waste.
+- If broken glass is uploaded into Dry or Wet waste, it is INCORRECT. The detected waste type is Hazardous Waste.`,
 });
 
 const checkWasteSegregationFlow = ai.defineFlow(

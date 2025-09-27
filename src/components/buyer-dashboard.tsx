@@ -11,18 +11,24 @@ import {
 import { Button } from '@/components/ui/button';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { PieChart, Pie, Cell, Tooltip } from 'recharts';
-import { Leaf, Recycle, Atom, ShoppingCart } from 'lucide-react';
+import { Leaf, Recycle, Atom, ShoppingCart, MapPin, Clock, DollarSign } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+
+
+type ProductData = {
+    name: string;
+    value: number;
+    fill: string;
+    pricePerTon: number;
+}
 
 type WasteStreamData = {
   type: string;
   totalTons: number;
-  potential: {
-    name: string;
-    value: number;
-    fill: string;
-  }[];
-  revenueStreams: string[];
   icon: React.ReactNode;
+  potential: ProductData[];
+  location: string;
+  leadTime: string;
 }
 
 const wasteStreams: WasteStreamData[] = [
@@ -30,33 +36,36 @@ const wasteStreams: WasteStreamData[] = [
         type: 'Wet Waste',
         totalTons: 1250,
         icon: <Leaf className="h-6 w-6 text-green-500" />,
+        location: 'Amberpet Composting Plant',
+        leadTime: '30-45 Days',
         potential: [
-            { name: 'Compost', value: 750, fill: 'var(--color-compost)' },
-            { name: 'Biogas', value: 400, fill: 'var(--color-biogas)' },
-            { name: 'Animal Feed', value: 100, fill: 'var(--color-animalFeed)' },
+            { name: 'Organic Compost', value: 750, fill: 'var(--color-compost)', pricePerTon: 50 },
+            { name: 'Biogas Feedstock', value: 400, fill: 'var(--color-biogas)', pricePerTon: 20 },
+            { name: 'Animal Feed Base', value: 100, fill: 'var(--color-animalFeed)', pricePerTon: 35 },
         ],
-        revenueStreams: ['Organic Fertilizer', 'Renewable Energy', 'Livestock Nutrition'],
     },
     {
         type: 'Dry Waste',
         totalTons: 800,
         icon: <Recycle className="h-6 w-6 text-blue-500" />,
+        location: 'Jeedimetla Recycling Hub',
+        leadTime: '7-14 Days',
         potential: [
-            { name: 'Recycled Plastic (PET/HDPE)', value: 400, fill: 'var(--color-plastic)' },
-            { name: 'Paper/Cardboard Bales', value: 250, fill: 'var(--color-paper)' },
-            { name: 'Scrap Metal & Glass', value: 150, fill: 'var(--color-metal)' },
+            { name: 'PET/HDPE Pellets', value: 400, fill: 'var(--color-plastic)', pricePerTon: 200 },
+            { name: 'Cardboard Bales', value: 250, fill: 'var(--color-paper)', pricePerTon: 80 },
+            { name: 'Scrap Metal Mix', value: 150, fill: 'var(--color-metal)', pricePerTon: 150 },
         ],
-        revenueStreams: ['Plastic Pellets', 'Pulp for Paper Mills', 'Metal & Glass Recycling'],
     },
     {
         type: 'Hazardous Waste',
         totalTons: 50,
         icon: <Atom className="h-6 w-6 text-red-500" />,
+        location: 'Dundigal W2E Facility',
+        leadTime: 'On-Demand',
         potential: [
-            { name: 'Incineration Ash', value: 35, fill: 'var(--color-disposed)' },
-            { name: 'Refuse-Derived Fuel (RDF)', value: 15, fill: 'var(--color-energy)' },
+            { name: 'Refuse-Derived Fuel (RDF)', value: 35, fill: 'var(--color-energy)', pricePerTon: 40 },
+            { name: 'Incineration Ash (for bricks)', value: 15, fill: 'var(--color-disposed)', pricePerTon: 15 },
         ],
-        revenueStreams: ['Waste-to-Energy', 'Construction Material'],
     },
 ];
 
@@ -67,8 +76,8 @@ const wasteChartConfig = {
     plastic: { label: 'Plastic', color: 'hsl(var(--chart-1))' },
     paper: { label: 'Paper', color: 'hsl(var(--chart-2))' },
     metal: { label: 'Metal/Glass', color: 'hsl(var(--chart-3))' },
-    disposed: { label: 'Disposed', color: 'hsl(var(--chart-1))' },
-    energy: { label: 'Energy', color: 'hsl(var(--chart-2))' },
+    disposed: { label: 'Disposed', color: 'hsl(var(--chart-2))' },
+    energy: { label: 'Energy', color: 'hsl(var(--chart-1))' },
 };
 
 
@@ -78,9 +87,9 @@ export function BuyerDashboard() {
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl font-headline"><ShoppingCart /> Waste Resource Marketplace</CardTitle>
-                <CardDescription>Browse available processed waste materials for purchase. All quantities are estimates in tons per month.</CardDescription>
+                <CardDescription>Browse available processed waste materials for purchase. All quantities are estimated monthly outputs.</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-8 md:grid-cols-3">
+            <CardContent className="grid gap-8 md:grid-cols-1 lg:grid-cols-3">
                 {wasteStreams.map(stream => (
                     <Card key={stream.type} className="flex flex-col">
                         <CardHeader className="pb-2">
@@ -88,31 +97,44 @@ export function BuyerDashboard() {
                                 {stream.icon}
                                 {stream.type}
                              </CardTitle>
-                             <p className="text-2xl font-bold">{stream.totalTons} <span className="text-sm font-normal text-muted-foreground">Tons/Month</span></p>
+                             <p className="text-2xl font-bold">{stream.totalTons} <span className="text-sm font-normal text-muted-foreground">Tons/Month (Total Input)</span></p>
                         </CardHeader>
                         <CardContent className="flex-1 flex flex-col justify-between">
                             <div>
-                                 <ChartContainer config={wasteChartConfig} className="mx-auto aspect-square h-40">
-                                    <PieChart>
-                                        <Tooltip content={<ChartTooltipContent hideLabel />} />
-                                        <Pie data={stream.potential} dataKey="value" nameKey="name" innerRadius={30} paddingAngle={5}>
-                                            {stream.potential.map((entry) => (
-                                                <Cell key={entry.name} fill={entry.fill} />
-                                            ))}
-                                        </Pie>
-                                    </PieChart>
-                                 </ChartContainer>
-                                 <div className="mt-4">
-                                    <p className="font-semibold text-sm mb-2">Available Products:</p>
-                                    <ul className="space-y-1 text-sm text-muted-foreground">
+                                <div className="text-sm text-muted-foreground space-y-2 mb-4">
+                                     <div className="flex items-center gap-2">
+                                        <MapPin className="h-4 w-4"/>
+                                        <span>Facility: <strong>{stream.location}</strong></span>
+                                     </div>
+                                      <div className="flex items-center gap-2">
+                                        <Clock className="h-4 w-4"/>
+                                        <span>Est. Lead Time: <strong>{stream.leadTime}</strong></span>
+                                     </div>
+                                </div>
+                                
+                                <p className="font-semibold text-sm mb-2">Available Products (Estimated Monthly Output):</p>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Product</TableHead>
+                                            <TableHead className="text-center">Quantity</TableHead>
+                                            <TableHead className="text-right">Price</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
                                         {stream.potential.map(p => (
-                                            <li key={p.name} className="flex items-center gap-2">
-                                                <div className="h-2 w-2 rounded-full" style={{backgroundColor: p.fill}}/>
-                                                {p.name}: <span className="font-medium text-foreground">{p.value} Tons</span>
-                                            </li>
+                                            <TableRow key={p.name}>
+                                                <TableCell className="font-medium flex items-center gap-2">
+                                                    <div className="h-2 w-2 rounded-full" style={{backgroundColor: p.fill}}/>
+                                                    {p.name}
+                                                </TableCell>
+                                                <TableCell className="text-center">{p.value} T</TableCell>
+                                                <TableCell className="text-right">${p.pricePerTon}/T</TableCell>
+                                            </TableRow>
                                         ))}
-                                    </ul>
-                                 </div>
+                                    </TableBody>
+                                </Table>
+
                              </div>
                              <Button className="w-full mt-6">Place Inquiry</Button>
                         </CardContent>

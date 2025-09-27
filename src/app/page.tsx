@@ -69,6 +69,7 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   useEffect(() => {
+    // If auth is not loading and a user exists, redirect to dashboard.
     if (!authLoading && user) {
       router.push('/dashboard');
     }
@@ -77,7 +78,7 @@ export default function LoginPage() {
   const emailForm = useForm<z.infer<typeof emailLoginFormSchema>>({
     resolver: zodResolver(emailLoginFormSchema),
     defaultValues: {
-      email: roleCredentials.Citizen.email,
+      email: roleCredentials.Admin.email, // Default to Admin for the email form
       password: 'password',
     },
   })
@@ -146,18 +147,31 @@ export default function LoginPage() {
 
 
   const handleTabChange = (role: Role) => {
-    emailForm.setValue('email', roleCredentials[role].email);
-    emailForm.setValue('password', 'password');
+    if (role !== 'Citizen') {
+      emailForm.setValue('email', roleCredentials[role].email);
+      emailForm.setValue('password', 'password');
+    }
   }
 
-  // Display a loading indicator until auth state is confirmed and user is not logged in.
-  if (authLoading || user) {
+  // Show a full-screen loader while we're determining the auth state.
+  if (authLoading) {
      return (
         <div className="flex justify-center items-center h-screen">
             <Loader2 className="h-8 w-8 animate-spin" />
         </div>
     )
   }
+  
+  // If the user is already logged in, the useEffect will handle redirection.
+  // We can render null or a minimal loader here to avoid flashing the login page.
+  if (user) {
+    return (
+       <div className="flex justify-center items-center h-screen">
+           <Loader2 className="h-8 w-8 animate-spin" />
+       </div>
+   );
+  }
+
 
   const EmailLoginForm = ({ role }: { role: Role }) => (
     <Form {...emailForm}>

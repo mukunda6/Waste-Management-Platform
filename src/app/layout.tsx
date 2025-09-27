@@ -25,9 +25,9 @@ function AppContent({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const pathname = usePathname();
   
-  // Determine if the current page is a public-facing page
   const isPublicPage = ['/', '/signup'].includes(pathname);
 
+  // While auth is loading and we are on a private page, show a loader.
   if (loading && !isPublicPage) {
      return (
       <div className="flex h-full w-full items-center justify-center">
@@ -36,8 +36,9 @@ function AppContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // If auth is loading on a public page, or if there's no user on a private page, show a loader
-  if ((loading && isPublicPage) || (!user && !isPublicPage)) {
+  // If we are on a private page and there is no user, redirecting is handled by page effects.
+  // Show a loader until redirection completes.
+  if (!loading && !user && !isPublicPage) {
     return (
       <div className="flex h-full w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />

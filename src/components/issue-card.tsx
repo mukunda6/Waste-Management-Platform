@@ -16,7 +16,11 @@ import {
   Car,
   Biohazard,
   Recycle,
-  AlertTriangle
+  AlertTriangle,
+  Droplets,
+  Waves,
+  TreePine,
+  Dog,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
@@ -29,6 +33,12 @@ const categoryDetails: Record<Issue['category'], { icon: React.ReactNode, imageH
     'Non-segregation of Waste': { icon: <Recycle className="h-4 w-4" />, imageHint: 'mixed waste' },
     'Collection Vehicle Late': { icon: <Car className="h-4 w-4" />, imageHint: 'garbage truck' },
     'Public Area Unclean': { icon: <Trash2 className="h-4 w-4" />, imageHint: 'dirty street' },
+    'Water Supply': { icon: <Droplets className="h-4 w-4" />, imageHint: 'water pipe' },
+    'Drainage': { icon: <Waves className="h-4 w-4" />, imageHint: 'sewer drain' },
+    'Roads & Footpaths': { icon: <Car className="h-4 w-4" />, imageHint: 'pothole road' },
+    'Streetlights': { icon: <Lightbulb className="h-4 w-4" />, imageHint: 'street light' },
+    'Parks & Trees': { icon: <TreePine className="h-4 w-4" />, imageHint: 'park tree' },
+    'Stray Animals': { icon: <Dog className="h-4 w-4" />, imageHint: 'stray dog' },
     'Hazardous Waste Spillage': { icon: <Biohazard className="h-4 w-4" />, imageHint: 'chemical spill' },
     'Biomedical Waste Dumped': { icon: <Biohazard className="h-4 w-4" />, imageHint: 'medical waste' },
     'Dead Animal': { icon: <Trash2 className="h-4 w-4" />, imageHint: 'road kill' },

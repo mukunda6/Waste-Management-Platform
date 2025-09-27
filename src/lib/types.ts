@@ -9,7 +9,13 @@ export type IssueCategory =
   | 'Illegal Dumping'
   | 'Non-segregation of Waste'
   | 'Collection Vehicle Late'
-  | 'Public Area Unclean';
+  | 'Public Area Unclean'
+  | 'Water Supply'
+  | 'Drainage'
+  | 'Roads & Footpaths'
+  | 'Streetlights'
+  | 'Parks & Trees'
+  | 'Stray Animals';
 
 export type EmergencyCategory =
   | 'Hazardous Waste Spillage'

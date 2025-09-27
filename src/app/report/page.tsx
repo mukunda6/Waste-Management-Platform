@@ -23,6 +23,12 @@ const standardCategories: IssueCategory[] = [
     'Non-segregation of Waste',
     'Collection Vehicle Late',
     'Public Area Unclean',
+    'Water Supply',
+    'Drainage',
+    'Roads & Footpaths',
+    'Streetlights',
+    'Parks & Trees',
+    'Stray Animals',
 ];
 
 function ReportPageContent() {
@@ -50,9 +56,9 @@ function ReportPageContent() {
     <div className="max-w-2xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-headline">Report a Waste Issue</CardTitle>
+          <CardTitle className="text-2xl font-headline">Report a Civic Issue</CardTitle>
           <CardDescription>
-            Help improve your community's waste management. Please provide a clear
+            Help improve your community by reporting an issue. Please provide a clear
             photo and description.
           </CardDescription>
         </CardHeader>
@@ -61,6 +67,7 @@ function ReportPageContent() {
             user={user} 
             allowedCategories={standardCategories}
             initialCategory={category}
+            categoryPlaceholder="Select a issue category"
           />
         </CardContent>
       </Card>

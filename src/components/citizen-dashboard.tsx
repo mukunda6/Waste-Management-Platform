@@ -13,21 +13,25 @@ import { Button } from '@/components/ui/button';
 import { getIssuesByUser } from '@/lib/firebase-service';
 import type { Issue, IssueCategory } from '@/lib/types';
 import { IssueCard } from './issue-card';
-import { FilePlus2, Clock, CheckCircle, AlertTriangle, Trash2, ShoppingCart, BookOpen, Recycle, Download, Gift, Star, Gem } from 'lucide-react';
+import { FilePlus2, Clock, CheckCircle, AlertTriangle, Trash2, Recycle, BookOpen, Droplets, Waves, Car, TreePine, Dog } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLanguage } from '@/hooks/use-language';
 import { Progress } from './ui/progress';
-import { useToast } from '@/hooks/use-toast';
 import { WasteLogDialog } from './waste-log-dialog';
-import { Separator } from './ui/separator';
 
-const wasteCategories: { category: IssueCategory; icon: React.ReactNode; description: string; }[] = [
+const reportCategories: { category: IssueCategory; icon: React.ReactNode; description: string; }[] = [
     { category: 'Overflowing Bins', icon: <Trash2 className="h-8 w-8" />, description: 'Public bin is full.'},
     { category: 'Illegal Dumping', icon: <Trash2 className="h-8 w-8" />, description: 'Waste dumped in public space.' },
     { category: 'Garbage Not Collected', icon: <Trash2 className="h-8 w-8" />, description: 'Home or street collection missed.' },
     { category: 'Non-segregation of Waste', icon: <Recycle className="h-8 w-8" />, description: 'Mixed waste not segregated.' },
+    { category: 'Water Supply', icon: <Droplets className="h-8 w-8" />, description: 'Contamination or low pressure.'},
+    { category: 'Drainage', icon: <Waves className="h-8 w-8" />, description: 'Blocked drains, overflowing sewers.'},
+    { category: 'Roads & Footpaths', icon: <Car className="h-8 w-8" />, description: 'Potholes or broken sidewalks.'},
+    { category: 'Streetlights', icon: <Car className="h-8 w-8" />, description: 'Outages or flickering lights.'},
+    { category: 'Parks & Trees', icon: <TreePine className="h-8 w-8" />, description: 'Fallen trees or park maintenance.'},
+    { category: 'Stray Animals', icon: <Dog className="h-8 w-8" />, description: 'Stray dogs or animal control.'},
 ];
 
 export function CitizenDashboard() {
@@ -84,8 +88,8 @@ export function CitizenDashboard() {
     <div className="grid gap-8">
        <Card>
          <CardHeader>
-            <CardTitle>Waste Report Hub</CardTitle>
-            <CardDescription>Report waste-related issues, log your disposal, or learn more about waste management.</CardDescription>
+            <CardTitle>Report Hub</CardTitle>
+            <CardDescription>Report waste-related and other civic issues, log your disposal, or learn more.</CardDescription>
          </CardHeader>
          <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -94,10 +98,10 @@ export function CitizenDashboard() {
                     className="col-span-full md:col-span-1 lg:col-span-1 text-center p-4 rounded-lg border border-destructive bg-destructive/10 hover:bg-destructive/20 transition-all flex flex-col items-center justify-center shadow-sm"
                 >
                     <div className="text-destructive mb-2"><AlertTriangle className="h-8 w-8" /></div>
-                    <h3 className="font-semibold text-sm text-destructive">Emergency Waste Report</h3>
+                    <h3 className="font-semibold text-sm text-destructive">Emergency Report</h3>
                     <p className="text-xs text-destructive/80 mt-1">For hazardous spills, biohazards, dead animals.</p>
                 </Link>
-                {wasteCategories.map(({ category, icon, description }) => (
+                {reportCategories.map(({ category, icon, description }) => (
                     <button
                         key={category}
                         onClick={() => handleCategoryClick(category)}

@@ -23,6 +23,10 @@ import {
   Recycle,
   Biohazard,
   AlertTriangle,
+  Droplets,
+  Waves,
+  TreePine,
+  Dog,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
@@ -46,6 +50,12 @@ const categoryIcons: Record<Issue['category'], React.ReactNode> = {
   'Non-segregation of Waste': <Recycle className="h-4 w-4" />,
   'Collection Vehicle Late': <Car className="h-4 w-4" />,
   'Public Area Unclean': <Trash2 className="h-4 w-4" />,
+  'Water Supply': <Droplets className="h-4 w-4" />,
+  'Drainage': <Waves className="h-4 w-4" />,
+  'Roads & Footpaths': <Car className="h-4 w-4" />,
+  'Streetlights': <Lightbulb className="h-4 w-4" />,
+  'Parks & Trees': <TreePine className="h-4 w-4" />,
+  'Stray Animals': <Dog className="h-4 w-4" />,
   'Hazardous Waste Spillage': <Biohazard className="h-4 w-4" />,
   'Biomedical Waste Dumped': <Biohazard className="h-4 w-4" />,
   'Dead Animal': <Trash2 className="h-4 w-4" />,

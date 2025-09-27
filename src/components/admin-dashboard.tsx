@@ -30,7 +30,7 @@ import type { Issue, Worker, SlaStatus } from '@/lib/types';
 import { format, formatDistanceToNow } from 'date-fns';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { ListChecks, Users, AlertTriangle, Clock, Map, Trash2, Percent, ShoppingBag, Truck, Check, X } from 'lucide-react';
+import { ListChecks, Users, AlertTriangle, Clock, Map, Trash2, Percent, ShoppingBag, Truck, Check, X, CheckCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';

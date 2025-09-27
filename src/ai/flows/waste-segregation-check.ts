@@ -35,7 +35,7 @@ export async function checkWasteSegregation(input: CheckWasteSegregationInput): 
 
 const prompt = ai.definePrompt({
   name: 'checkWasteSegregationPrompt',
-  model: 'googleai/gemini-1.5-flash',
+  model: 'googleai/gemini-2.5-flash',
   input: {schema: CheckWasteSegregationInputSchema},
   output: {schema: CheckWasteSegregationOutputSchema},
   prompt: `Analyze the uploaded image of waste and classify it strictly into one of three categories: Dry, Wet, or Hazardous. Pay close attention to details: if the image contains food, peels, or organic matter, classify as Wet. If it contains plastics, paper, or non-biodegradable items, classify as Dry. If it contains medical, chemical, or sharp objects, classify as Hazardous. Do not accept mismatched inputs (e.g., vegetable waste cannot be Dry). Provide both the predicted category and a short explanation for the classification.

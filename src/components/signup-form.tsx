@@ -64,22 +64,15 @@ const adminSchema = baseSchema.extend({
   }),
 });
 
-const headSchema = adminSchema.extend({
-  department: z.string().min(3, 'Department name is required.'),
-  jurisdiction: z.string().min(3, 'Jurisdiction is required.'),
-});
-
 const formSchemas = {
   Citizen: citizenSchema,
   Admin: adminSchema,
-  Head: headSchema,
   Buyer: buyerSchema,
 };
 
 type FormSchemaForRole<T extends UserRole> = 
     T extends 'Citizen' ? typeof citizenSchema :
     T extends 'Admin' ? typeof adminSchema :
-    T extends 'Head' ? typeof headSchema :
     T extends 'Buyer' ? typeof buyerSchema :
     never;
 
@@ -188,13 +181,13 @@ export function SignupForm({ role }: { role: UserRole }) {
         ) : null}
 
 
-        {(role === 'Admin' || role === 'Head' || role === 'Buyer') && (
+        {(role === 'Admin' || role === 'Buyer') && (
           <FormField control={form.control} name="email" render={({ field }) => (
               <FormItem><FormLabel>Official Email</FormLabel><FormControl><Input placeholder="Enter official email" {...field} type="email" /></FormControl><FormMessage /></FormItem>
           )}/>
         )}
 
-        {(role === 'Admin' || role === 'Head') && (
+        {(role === 'Admin') && (
             <div className="grid md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="password" render={({ field }) => (
                     <FormItem><FormLabel>Password</FormLabel><FormControl><Input placeholder="Create a strong password" {...field} type="password" /></FormControl><FormMessage /></FormItem>
@@ -206,7 +199,7 @@ export function SignupForm({ role }: { role: UserRole }) {
         )}
 
         {/* Staff-only Fields */}
-        {(role === 'Admin' || role === 'Head') && (
+        {(role === 'Admin') && (
             <>
                  <div className="grid md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="mobileNumber" render={({ field }) => (
@@ -220,18 +213,6 @@ export function SignupForm({ role }: { role: UserRole }) {
                     <FormItem><FormLabel>Office Address / Zone</FormLabel><FormControl><Textarea placeholder="Enter your full office address or zone" {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
             </>
-        )}
-
-        {/* Head-only Fields */}
-        {role === 'Head' && (
-            <div className="grid md:grid-cols-2 gap-4">
-                <FormField control={form.control} name="department" render={({ field }) => (
-                    <FormItem><FormLabel>Department</FormLabel><FormControl><Input placeholder="e.g., Sanitation, Public Works" {...field} /></FormControl><FormMessage /></FormItem>
-                )}/>
-                <FormField control={form.control} name="jurisdiction" render={({ field }) => (
-                    <FormItem><FormLabel>Jurisdiction</FormLabel><FormControl><Input placeholder="e.g., Zone North, District 5" {...field} /></FormControl><FormMessage /></FormItem>
-                )}/>
-            </div>
         )}
 
         {/* Admin-only Fields */}
@@ -277,7 +258,7 @@ export function SignupForm({ role }: { role: UserRole }) {
           </>
         )}
         
-        {(role === 'Admin' || role === 'Head' || role === 'Buyer') && (
+        {(role === 'Admin' || role === 'Buyer') && (
              <FormField control={form.control} name="terms" render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
                     <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
@@ -301,5 +282,3 @@ export function SignupForm({ role }: { role: UserRole }) {
     </Form>
   );
 }
-
-    

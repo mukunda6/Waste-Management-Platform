@@ -98,20 +98,6 @@ export function AppSidebar() {
               </SidebarMenuItem>
             </>
             )}
-             {(user?.role === 'Admin' || user?.role === 'Head') && (
-            <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === '/analytics'}
-                  tooltip={'Analytics'}
-                >
-                  <Link href="/analytics">
-                    <BarChart />
-                    <span>{'Analytics'}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            )}
         </SidebarMenu>
 
         

@@ -37,11 +37,10 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="Citizen" className="w-full" onValueChange={(value) => setRole(value as UserRole)}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="Citizen">Citizen</TabsTrigger>
               <TabsTrigger value="Buyer">Buyer</TabsTrigger>
               <TabsTrigger value="Admin">Admin</TabsTrigger>
-              <TabsTrigger value="Head">Head</TabsTrigger>
             </TabsList>
             <TabsContent value="Citizen">
               <SignupForm role="Citizen" />
@@ -51,9 +50,6 @@ export default function SignupPage() {
             </TabsContent>
             <TabsContent value="Admin">
                <SignupForm role="Admin" />
-            </TabsContent>
-            <TabsContent value="Head">
-                <SignupForm role="Head" />
             </TabsContent>
           </Tabs>
            <div className="mt-4 text-center text-sm">

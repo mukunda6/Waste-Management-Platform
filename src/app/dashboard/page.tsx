@@ -6,7 +6,6 @@ import { useSearchParams } from 'next/navigation'
 import type { UserRole } from '@/lib/types'
 import { CitizenDashboard } from '@/components/citizen-dashboard'
 import { AdminDashboard } from '@/components/admin-dashboard'
-import { HeadDashboard } from '@/components/head-dashboard'
 import { WorkerDashboard } from '@/components/worker-dashboard';
 import { BuyerDashboard } from '@/components/buyer-dashboard';
 import { Suspense, useEffect } from 'react'
@@ -40,8 +39,6 @@ function DashboardContent() {
         return <CitizenDashboard />
       case 'Admin':
         return <AdminDashboard />
-      case 'Head':
-        return <HeadDashboard />
       case 'Worker':
         return <WorkerDashboard user={user}/>
       case 'Buyer':
@@ -57,9 +54,7 @@ function DashboardContent() {
       case 'Citizen':
         return 'Manage your waste segregation, report issues, and track your green score.'
       case 'Admin':
-        return 'Monitor compliance, assign tasks, and manage waste facilities.'
-      case 'Head':
-        return 'City-wide analytics on waste management and policy effectiveness.'
+        return 'Monitor compliance, assign tasks, manage waste facilities, and view city-wide analytics.'
       case 'Worker':
         return 'View and manage your assigned waste collection tasks.'
       case 'Buyer':
@@ -75,8 +70,6 @@ function DashboardContent() {
         return 'Citizen Waste Dashboard';
       case 'Admin':
         return 'Waste Management Admin';
-      case 'Head':
-        return 'City-Wide Waste Analytics';
        case 'Worker':
         return 'Waste Worker Dashboard';
       case 'Buyer':

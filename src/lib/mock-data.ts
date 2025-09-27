@@ -7,15 +7,6 @@ const now = new Date();
 
 export const mockUsers: (AppUser & { password?: string })[] = [
   {
-    uid: 'head-user-01',
-    name: 'Waste Dept. Head',
-    nameKey: 'gmc_head',
-    email: 'head@test.com',
-    password: 'password',
-    role: 'Head',
-    avatarUrl: 'https://picsum.photos/seed/head/100/100',
-  },
-  {
     uid: 'admin-user-01',
     name: 'Waste Admin',
     nameKey: 'admin_manager',
@@ -292,5 +283,3 @@ export let mockIssues: Issue[] = [
     ]
   }
 ];
-
-    

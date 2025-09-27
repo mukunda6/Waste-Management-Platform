@@ -45,7 +45,7 @@ const otpSchema = z.object({
 });
 
 
-type Role = 'Citizen' | 'Admin' | 'Head' | 'Buyer';
+type Role = 'Citizen' | 'Admin' | 'Buyer';
 
 const roleCredentials: Record<Role, { emailOrMobile: string; description: string }> = {
     Citizen: {
@@ -58,12 +58,8 @@ const roleCredentials: Record<Role, { emailOrMobile: string; description: string
     },
     Admin: {
         emailOrMobile: 'admin@test.com',
-        description: 'Manage waste collection, monitor compliance, and assign tasks.'
+        description: 'Manage waste collection, monitor compliance, and oversee analytics.'
     },
-    Head: {
-        emailOrMobile: 'head@test.com',
-        description: 'Oversee city-wide waste analytics and policy effectiveness.'
-    }
 }
 
 export default function LoginPage() {
@@ -151,7 +147,7 @@ export default function LoginPage() {
 
 
   const handleTabChange = (role: Role) => {
-    if (role === 'Admin' || role === 'Head') {
+    if (role === 'Admin') {
       emailForm.setValue('email', roleCredentials[role].emailOrMobile);
       emailForm.setValue('password', 'password');
     } else {
@@ -330,11 +326,10 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="Citizen" className="w-full" onValueChange={(value) => handleTabChange(value as Role)}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="Citizen">Citizen</TabsTrigger>
               <TabsTrigger value="Buyer">Buyer</TabsTrigger>
               <TabsTrigger value="Admin">Admin</TabsTrigger>
-              <TabsTrigger value="Head">Head</TabsTrigger>
             </TabsList>
             <TabsContent value="Citizen">
                 <MobileLoginContent description={roleCredentials.Citizen.description} defaultMobile={roleCredentials.Citizen.emailOrMobile} />
@@ -347,12 +342,6 @@ export default function LoginPage() {
                  {roleCredentials.Admin.description}
                 </p>
               <EmailLoginForm role="Admin" />
-            </TabsContent>
-            <TabsContent value="Head">
-                 <p className="text-sm text-muted-foreground text-center h-10 flex items-center justify-center px-4">
-                 {roleCredentials.Head.description}
-                </p>
-              <EmailLoginForm role="Head" />
             </TabsContent>
           </Tabs>
            <div className="mt-4 text-center text-sm">

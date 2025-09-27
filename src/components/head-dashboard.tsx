@@ -13,19 +13,22 @@ import { getIssues } from '@/lib/firebase-service';
 import type { Issue } from '@/lib/types';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { BarChart, PieChart, LineChart, Line, Legend, Bar, XAxis, YAxis, Tooltip, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { BarChart, LineChart, Line, Legend, Bar, XAxis, YAxis, Tooltip, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { Users, Map, Recycle, TrendingUp, Atom, Leaf, Fuel } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 
+type WasteProduct = {
+  name: string;
+  value: number; // Potential tons
+  sold: number; // Sold tons
+  fill: string;
+};
+
 type WasteStreamData = {
   type: string;
   totalTons: number;
-  potential: {
-    name: string;
-    value: number;
-    fill: string;
-  }[];
+  potential: WasteProduct[];
   revenueStreams: string[];
   icon: React.ReactNode;
 }
@@ -36,9 +39,9 @@ const wasteStreams: WasteStreamData[] = [
         totalTons: 1250,
         icon: <Leaf className="h-6 w-6 text-green-500" />,
         potential: [
-            { name: 'Compost', value: 750, fill: 'var(--color-compost)' },
-            { name: 'Biogas', value: 400, fill: 'var(--color-biogas)' },
-            { name: 'Animal Feed', value: 100, fill: 'var(--color-animalFeed)' },
+            { name: 'Compost', value: 750, sold: 600, fill: 'var(--color-compost)' },
+            { name: 'Biogas', value: 400, sold: 400, fill: 'var(--color-biogas)' },
+            { name: 'Animal Feed', value: 100, sold: 50, fill: 'var(--color-animalFeed)' },
         ],
         revenueStreams: ['Sell to Farmers', 'Power Generation', 'Livestock Farms'],
     },
@@ -47,9 +50,9 @@ const wasteStreams: WasteStreamData[] = [
         totalTons: 800,
         icon: <Recycle className="h-6 w-6 text-blue-500" />,
         potential: [
-            { name: 'Recycled Plastic', value: 400, fill: 'var(--color-plastic)' },
-            { name: 'Paper/Cardboard', value: 250, fill: 'var(--color-paper)' },
-            { name: 'Metal & Glass', value: 150, fill: 'var(--color-metal)' },
+            { name: 'Recycled Plastic', value: 400, sold: 320, fill: 'var(--color-plastic)' },
+            { name: 'Paper/Cardboard', value: 250, sold: 150, fill: 'var(--color-paper)' },
+            { name: 'Metal & Glass', value: 150, sold: 150, fill: 'var(--color-metal)' },
         ],
         revenueStreams: ['Recycling Plants', 'Paper Mills', 'Scrap Dealers'],
     },
@@ -58,14 +61,16 @@ const wasteStreams: WasteStreamData[] = [
         totalTons: 50,
         icon: <Atom className="h-6 w-6 text-red-500" />,
         potential: [
-            { name: 'Safely Disposed', value: 35, fill: 'var(--color-disposed)' },
-            { name: 'Energy Recovery', value: 15, fill: 'var(--color-energy)' },
+            { name: 'Energy Recovery', value: 35, sold: 30, fill: 'var(--color-energy)' },
+            { name: 'Safely Disposed', value: 15, sold: 15, fill: 'var(--color-disposed)' },
         ],
         revenueStreams: ['Waste-to-Energy Plants', 'Secure Landfills'],
     },
 ];
 
 const wasteChartConfig = {
+    value: { label: 'Potential', color: 'hsl(var(--chart-2))' },
+    sold: { label: 'Sold', color: 'hsl(var(--chart-1))' },
     compost: { label: 'Compost', color: 'hsl(var(--chart-1))' },
     biogas: { label: 'Biogas', color: 'hsl(var(--chart-2))' },
     animalFeed: { label: 'Animal Feed', color: 'hsl(var(--chart-3))' },
@@ -117,9 +122,9 @@ export function HeadDashboard() {
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Fuel/> Waste Stream Analytics: From Trash to Treasure</CardTitle>
-                <CardDescription>Analysis of collected waste and its potential for generating valuable resources and revenue.</CardDescription>
+                <CardDescription>Analysis of collected waste, its potential for generating valuable resources, and sales performance.</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-8 md:grid-cols-3">
+            <CardContent className="grid gap-8 md:grid-cols-1 lg:grid-cols-3">
                 {wasteStreams.map(stream => (
                     <Card key={stream.type}>
                         <CardHeader className="pb-2">
@@ -130,26 +135,36 @@ export function HeadDashboard() {
                              <p className="text-2xl font-bold">{stream.totalTons} <span className="text-sm font-normal text-muted-foreground">Tons/Month</span></p>
                         </CardHeader>
                         <CardContent>
-                             <ChartContainer config={wasteChartConfig} className="mx-auto aspect-square h-48">
-                                <PieChart>
-                                    <Tooltip content={<ChartTooltipContent hideLabel />} />
-                                    <Pie data={stream.potential} dataKey="value" nameKey="name" innerRadius={40}>
-                                        {stream.potential.map((entry) => (
-                                            <Cell key={entry.name} fill={entry.fill} />
-                                        ))}
-                                    </Pie>
-                                </PieChart>
+                            <ChartContainer config={wasteChartConfig} className="h-48 w-full">
+                                <BarChart data={stream.potential} layout="vertical" margin={{left: 20}}>
+                                    <XAxis type="number" hide />
+                                    <YAxis dataKey="name" type="category" hide/>
+                                    <Tooltip cursor={{fill: 'hsl(var(--muted))'}} content={<ChartTooltipContent />} />
+                                    <Legend />
+                                    <Bar dataKey="value" name="Potential" fill="var(--color-value)" radius={4} />
+                                    <Bar dataKey="sold" name="Sold" fill="var(--color-sold)" radius={4} />
+                                </BarChart>
                              </ChartContainer>
                              <div className="mt-4">
-                                <p className="font-semibold text-sm mb-2">Potential Outputs:</p>
-                                <ul className="space-y-1 text-sm text-muted-foreground">
-                                    {stream.potential.map(p => (
-                                        <li key={p.name} className="flex items-center gap-2">
-                                            <div className="h-2 w-2 rounded-full" style={{backgroundColor: p.fill}}/>
-                                            {p.name}: <span className="font-medium text-foreground">{p.value} Tons</span>
-                                        </li>
-                                    ))}
-                                </ul>
+                                <p className="font-semibold text-sm mb-2">Sales & Output Analysis:</p>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Product</TableHead>
+                                            <TableHead className="text-right">Sold / Potential (T)</TableHead>
+                                            <TableHead className="text-right">% Sold</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {stream.potential.map(p => (
+                                            <TableRow key={p.name}>
+                                                <TableCell className="font-medium">{p.name}</TableCell>
+                                                <TableCell className="text-right">{p.sold} / {p.value}</TableCell>
+                                                <TableCell className="text-right font-bold text-primary">{((p.sold / p.value) * 100).toFixed(0)}%</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
                              </div>
                              <div className="mt-4">
                                 <p className="font-semibold text-sm mb-2">Revenue Channels:</p>
@@ -200,3 +215,5 @@ export function HeadDashboard() {
     </div>
   )
 }
+
+    

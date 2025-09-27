@@ -15,7 +15,7 @@ import { Leaf, Recycle, Atom, ShoppingCart, MapPin, Clock, DollarSign, Truck, Ch
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
-import { format, formatDistanceToNow, parseISO } from 'date-fns';
+import { format, formatDistanceToNow, parseISO, addDays, subDays } from 'date-fns';
 
 
 type ProductData = {
@@ -81,10 +81,11 @@ type MyOrder = {
   status: 'Pending Approval' | 'Approved' | 'In Transit' | 'Delivered' | 'Denied';
 };
 
+const now = new Date();
 const myOrders: MyOrder[] = [
-    { id: 'order-002', product: 'Organic Compost', quantity: 25, orderDate: '2024-07-27T14:30:00Z', deliveryDate: '2024-08-10T17:00:00Z', status: 'Approved' },
-    { id: 'order-003', product: 'Incineration Ash', quantity: 5, orderDate: '2024-07-26T11:00:00Z', deliveryDate: '2024-08-01T17:00:00Z', status: 'In Transit' },
-    { id: 'order-004', product: 'Cardboard Bales', quantity: 15, orderDate: '2024-07-20T09:00:00Z', deliveryDate: '2024-07-28T17:00:00Z', status: 'Delivered' },
+    { id: 'order-002', product: 'Organic Compost', quantity: 25, orderDate: subDays(now, 2).toISOString(), deliveryDate: addDays(now, 8).toISOString(), status: 'Approved' },
+    { id: 'order-003', product: 'Incineration Ash', quantity: 5, orderDate: subDays(now, 4).toISOString(), deliveryDate: addDays(now, 1).toISOString(), status: 'In Transit' },
+    { id: 'order-004', product: 'Cardboard Bales', quantity: 15, orderDate: subDays(now, 10).toISOString(), deliveryDate: subDays(now, 2).toISOString(), status: 'Delivered' },
 ];
 
 const orderStatusConfig = {

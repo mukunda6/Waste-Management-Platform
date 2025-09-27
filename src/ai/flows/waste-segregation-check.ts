@@ -25,6 +25,7 @@ export type CheckWasteSegregationInput = z.infer<typeof CheckWasteSegregationInp
 const CheckWasteSegregationOutputSchema = z.object({
   isCorrectlySegregated: z.boolean().describe('Whether the waste in the image is correctly segregated according to the expected type.'),
   reason: z.string().describe('A brief explanation for the decision, especially if it is not correctly segregated (e.g., "Image contains mixed waste like food scraps in a dry waste bin.").'),
+  detectedWasteType: z.enum(['Dry Waste', 'Wet Waste', 'Hazardous Waste', 'Mixed Waste', 'Uncertain']).optional().describe('The actual type of waste detected in the image, especially if it differs from the expected type.'),
 });
 export type CheckWasteSegregationOutput = z.infer<typeof CheckWasteSegregationOutputSchema>;
 
@@ -37,7 +38,7 @@ const prompt = ai.definePrompt({
   model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: CheckWasteSegregationInputSchema},
   output: {schema: CheckWasteSegregationOutputSchema},
-  prompt: `You are an expert waste management inspector. Your task is to verify if a user has correctly segregated their waste based on an uploaded image.
+  prompt: `You are an expert waste management inspector. Your task is to verify if a user has correctly segregated their waste based on an uploaded image and to identify the actual waste type.
 
 You will be given a photo and the type of waste the user claims it is.
 
@@ -46,16 +47,20 @@ You will be given a photo and the type of waste the user claims it is.
 **Image to Analyze:**
 {{media url=photoDataUri}}
 
-**Your Task:**
+**Your Tasks:**
 1.  **Analyze the image:** Carefully examine the contents of the waste bin or pile in the photo.
-2.  **Compare with expectations:**
-    *   If **Expected Waste Type** is **"Wet Waste"**, look for compostable materials like fruit/vegetable peels, leftover food, coffee grounds, and garden waste. The presence of plastic, metal, or paper would be incorrect.
-    *   If **Expected Waste Type** is **"Dry Waste"**, look for recyclable materials like plastic bottles, containers, paper, cardboard, and metal cans. The presence of food scraps or organic matter would be incorrect.
-    *   If **Expected Waste Type** is **"Hazardous Waste"**, look for items like batteries, light bulbs, paint cans, or e-waste. It should not contain regular dry or wet waste.
-3.  **Make a decision:**
-    *   Set **isCorrectlySegregated** to \`true\` if the waste in the image correctly matches the expected type.
-    *   Set **isCorrectlySegregated** to \`false\` if you see significant contamination with other waste types.
-4.  **Provide a reason:** Briefly explain your decision in the **reason** field. If incorrect, clearly state what was wrong (e.g., "Incorrect. Plastic items found in wet waste." or "Correct. Only dry recyclable materials are visible."). Be specific about the contaminants found.`,
+2.  **Identify Actual Waste Type:** First, determine the primary type of waste visible in the image. Classify it as 'Wet Waste', 'Dry Waste', 'Hazardous Waste', or 'Mixed Waste' if multiple types are present. If you cannot be certain, use 'Uncertain'. Set the \`detectedWasteType\` field with this value.
+3.  **Compare and Decide:** Compare your detected waste type with the user's \`expectedWasteType\`.
+    *   Set \`isCorrectlySegregated\` to \`true\` if the \`detectedWasteType\` (or a component of it, in case of mixed waste) matches the \`expectedWasteType\`.
+    *   Set \`isCorrectlySegregated\` to \`false\` if they do not match.
+4.  **Provide a Reason:** Briefly explain your decision in the \`reason\` field.
+    *   If correct: "Correct. The image contains only {detectedWasteType}."
+    *   If incorrect: "Incorrect. This appears to be {detectedWasteType}, not {expectedWasteType}." or "Incorrect. Found {contaminant} in the {expectedWasteType} bin." Be specific.
+
+**Definitions for Analysis:**
+*   **"Wet Waste"**: Compostable materials like fruit/vegetable peels, leftover food, coffee grounds, garden waste.
+*   **"Dry Waste"**: Recyclable materials like plastic bottles, containers, paper, cardboard, metal cans.
+*   **"Hazardous Waste"**: Items like batteries, light bulbs, paint cans, or e-waste. It should NOT contain regular dry or wet waste.`,
 });
 
 const checkWasteSegregationFlow = ai.defineFlow(

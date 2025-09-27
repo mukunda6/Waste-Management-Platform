@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState } from 'react';
@@ -33,6 +32,7 @@ export function WasteLogDialog({ wasteType }: WasteLogDialogProps) {
   const [analysisResult, setAnalysisResult] = useState<{
     correct: boolean;
     reason: string;
+    detectedType?: string;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -55,6 +55,7 @@ export function WasteLogDialog({ wasteType }: WasteLogDialogProps) {
         setAnalysisResult({
           correct: result.isCorrectlySegregated,
           reason: result.reason,
+          detectedType: result.detectedWasteType,
         });
 
         if (result.isCorrectlySegregated) {
@@ -65,10 +66,14 @@ export function WasteLogDialog({ wasteType }: WasteLogDialogProps) {
             description: `You've earned 10 compliance points for correct segregation.`,
           });
         } else {
+          let description = result.reason;
+          if (result.detectedWasteType && result.detectedWasteType !== wasteType && result.detectedWasteType !== 'Mixed Waste' && result.detectedWasteType !== 'Uncertain') {
+            description = `This looks like ${result.detectedWasteType}. Please use the 'Log ${result.detectedWasteType}' option.`;
+          }
           toast({
             variant: 'destructive',
             title: 'Segregation Incorrect',
-            description: result.reason,
+            description: description,
           });
         }
         setIsLoading(false);
@@ -167,7 +172,16 @@ export function WasteLogDialog({ wasteType }: WasteLogDialogProps) {
                 )}>
                     <div className="flex items-center gap-2">
                          {analysisResult.correct ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-                        <p>{analysisResult.reason}</p>
+                         
+                          <p>
+                            {analysisResult.correct 
+                              ? analysisResult.reason
+                              : (analysisResult.detectedType && analysisResult.detectedType !== wasteType && analysisResult.detectedType !== 'Mixed Waste' && analysisResult.detectedType !== 'Uncertain')
+                                ? `This looks like ${analysisResult.detectedType}. Please use the 'Log ${analysisResult.detectedType}' option.`
+                                : analysisResult.reason
+                            }
+                          </p>
+
                     </div>
                     {!analysisResult.correct && (
                         <Button size="sm" variant="secondary" className="gap-2" asChild>

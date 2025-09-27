@@ -20,9 +20,12 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { GraduationCap, Award, Recycle, CheckCircle, Lightbulb, Star } from 'lucide-react';
+import { GraduationCap, Award, Recycle, CheckCircle, Lightbulb, Star, Apple, GlassWater, Trash2, Bot } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Confetti from 'react-confetti';
+import { DragDropContext, Droppable, Draggable, DropResult, DroppableProps } from 'react-beautiful-dnd';
+import { cn } from '@/lib/utils';
+
 
 const modules = [
   {
@@ -63,6 +66,52 @@ const modules = [
   },
 ];
 
+// Helper for react-beautiful-dnd in strict mode
+const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
+    const [enabled, setEnabled] = useState(false);
+    useEffect(() => {
+        const animation = requestAnimationFrame(() => setEnabled(true));
+        return () => {
+            cancelAnimationFrame(animation);
+            setEnabled(false);
+        };
+    }, []);
+    if (!enabled) {
+        return null;
+    }
+    return <Droppable {...props}>{children}</Droppable>;
+};
+
+
+const initialItems = {
+  'item-1': { id: 'item-1', content: 'Plastic Bottle', category: 'Dry Waste', icon: <GlassWater /> },
+  'item-2': { id: 'item-2', content: 'Apple Core', category: 'Wet Waste', icon: <Apple /> },
+  'item-3': { id: 'item-3', content: 'Broken Glass', category: 'Hazardous Waste', icon: <Trash2 /> },
+};
+
+const initialColumns = {
+  'itemsToSort': {
+    id: 'itemsToSort',
+    title: 'Items to Sort',
+    itemIds: ['item-1', 'item-2', 'item-3'],
+  },
+  'Dry Waste': {
+    id: 'Dry Waste',
+    title: 'Dry Waste',
+    itemIds: [],
+  },
+  'Wet Waste': {
+    id: 'Wet Waste',
+    title: 'Wet Waste',
+    itemIds: [],
+  },
+  'Hazardous Waste': {
+      id: 'Hazardous Waste',
+      title: 'Hazardous Waste',
+      itemIds: [],
+  }
+};
+
 
 export default function TrainingPage() {
   const { toast } = useToast();
@@ -70,6 +119,8 @@ export default function TrainingPage() {
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
   const [showConfetti, setShowConfetti] = useState(false);
   
+  const [columns, setColumns] = useState(initialColumns);
+
   const progress = (completedModules.length / modules.length) * 100;
   const isAllCompleted = completedModules.length === modules.length;
 
@@ -102,6 +153,78 @@ export default function TrainingPage() {
         setTimeout(() => setShowConfetti(false), 8000);
       }
     }
+  };
+
+  const onDragEnd = (result: DropResult) => {
+    const { destination, source, draggableId } = result;
+
+    if (!destination) {
+      return;
+    }
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    const start = columns[source.droppableId as keyof typeof columns];
+    const finish = columns[destination.droppableId as keyof typeof columns];
+    const item = initialItems[draggableId as keyof typeof initialItems];
+
+    if (start === finish) {
+        const newItemIds = Array.from(start.itemIds);
+        newItemIds.splice(source.index, 1);
+        newItemIds.splice(destination.index, 0, draggableId);
+
+        const newColumn = {
+            ...start,
+            itemIds: newItemIds,
+        };
+
+        setColumns({
+            ...columns,
+            [newColumn.id]: newColumn,
+        });
+        return;
+    }
+
+    // Moving from one list to another
+    const startItemIds = Array.from(start.itemIds);
+    startItemIds.splice(source.index, 1);
+    const newStart = {
+      ...start,
+      itemIds: startItemIds,
+    };
+
+    const finishItemIds = Array.from(finish.itemIds);
+    finishItemIds.splice(destination.index, 0, draggableId);
+    const newFinish = {
+      ...finish,
+      itemIds: finishItemIds,
+    };
+    
+    // Check if correct
+    if (item.category === finish.id) {
+        toast({
+            title: "Correct!",
+            description: `Good job! ${item.content} is ${item.category}.`,
+        });
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Oops, try again!",
+            description: `${item.content} does not belong in ${finish.id}.`,
+        });
+    }
+
+
+    setColumns({
+      ...columns,
+      [newStart.id]: newStart,
+      [newFinish.id]: newFinish,
+    });
   };
   
   return (
@@ -195,6 +318,59 @@ export default function TrainingPage() {
               ))}
             </Accordion>
           </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Bot /> Segregation Challenge</CardTitle>
+                <CardDescription>Drag and drop the items into the correct waste bins to test your knowledge.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <DragDropContext onDragEnd={onDragEnd}>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        {Object.values(columns).map(column => (
+                            <div key={column.id} className="flex flex-col">
+                                <h3 className="font-bold text-lg mb-2 text-center">{column.title}</h3>
+                                <StrictModeDroppable droppableId={column.id}>
+                                    {(provided, snapshot) => (
+                                        <div
+                                            ref={provided.innerRef}
+                                            {...provided.droppableProps}
+                                            className={cn(
+                                                "p-4 bg-muted/50 rounded-lg min-h-[200px] transition-colors",
+                                                snapshot.isDraggingOver ? "bg-primary/20" : ""
+                                            )}
+                                        >
+                                            {column.itemIds.map((itemId, index) => {
+                                                const item = initialItems[itemId as keyof typeof initialItems];
+                                                return (
+                                                    <Draggable key={item.id} draggableId={item.id} index={index}>
+                                                        {(provided, snapshot) => (
+                                                            <div
+                                                                ref={provided.innerRef}
+                                                                {...provided.draggableProps}
+                                                                {...provided.dragHandleProps}
+                                                                className={cn(
+                                                                    "p-3 mb-2 rounded-md bg-card shadow-sm border flex items-center gap-3",
+                                                                    snapshot.isDragging ? "shadow-lg scale-105" : ""
+                                                                )}
+                                                            >
+                                                                {item.icon}
+                                                                {item.content}
+                                                            </div>
+                                                        )}
+                                                    </Draggable>
+                                                );
+                                            })}
+                                            {provided.placeholder}
+                                        </div>
+                                    )}
+                                </StrictModeDroppable>
+                            </div>
+                        ))}
+                    </div>
+                </DragDropContext>
+            </CardContent>
         </Card>
       </div>
     </>

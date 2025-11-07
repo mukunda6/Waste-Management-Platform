@@ -6,3 +6,4 @@ To get started, take a look at src/app/page.tsx.
 # Citizen_Waste
 # Citizen_Waste
 # Citizen_Waste
+# Waste-Management-Platform
